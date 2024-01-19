@@ -45,6 +45,9 @@ const handleDuplicationError = (err) => {
   return errorObj;
 };
 
+const handleJSONWebTokenError = (error) =>
+  new ErrorHandler("Token is either invalid or expired!", 401);
+
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
@@ -52,6 +55,13 @@ module.exports = (err, req, res, next) => {
   if (error.name === "CastError") error = handleCastError(error);
   if (error.name === "ValidationError") error = handleValidationError(error);
   if (error.code === 11000) error = handleDuplicationError(error);
+  if (
+    error.name === "JsonWebTokenError" ||
+    error.name === "TokenExpiredError"
+  ) {
+    error = handleJSONWebTokenError(error);
+  }
+
   if (process.env.NODE_ENV === "production") {
     errorOnProduction(error, res);
   } else if (process.env.NODE_ENV === "development") {

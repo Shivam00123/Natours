@@ -1,8 +1,10 @@
 const jsonwebtoken = require("jsonwebtoken");
+const crypto = require("crypto");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
+const sendEmail = require("../utils/email");
 
 // const signJWTToken = (id) => {
 //   const jwtSecret = process.env.JWT_SECRET_TOKEN;
@@ -53,4 +55,69 @@ exports.loginUser = catchAsync(async (req, res, next) => {
 
 exports.isAuthenticated = catchAsync(async (req, res, next) => {
   await new JsonToken().verifyToken(req, res, next);
+});
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  //get user with email;
+  const { email } = req.body;
+  if (!email) return next(new ErrorHandler("Please provide an Email!", 400));
+
+  const user = await User.findOne({ email });
+  if (!user) return next(new ErrorHandler("User not found!", 400));
+
+  const resetToken = await user.createResetToken();
+  user.save({ validateBeforeSave: false });
+
+  const linkToResetPassword = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/users/resetPassword/${resetToken}`;
+
+  const subject = "Your Password reset Token is valid for 10min";
+  const message = `Forgot your password? Submit a patch request with your new password and confirmPassword to ${linkToResetPassword}.\nif you didn't forget your password, Please ignore this email.`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject,
+      message,
+    });
+    res.status(200).json({
+      status: "success",
+      message: "Token sent to mail.",
+    });
+  } catch (error) {
+    this.resetPasswordToken = undefined;
+    this.resetTokenExpiresIn = undefined;
+    user.save({ validateBeforeSave: false });
+    return next(new ErrorHandler("Something went wrong, Try again later", 500));
+  }
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const hashToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: hashToken,
+    resetTokenExpiresIn: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new ErrorHandler("Token is either Invalid or expired", 400));
+  }
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+  user.resetPasswordToken = undefined;
+  user.resetTokenExpiresIn = undefined;
+
+  await user.save();
+
+  const token = await new JsonToken(user._id).signToken();
+  res.status(200).json({
+    status: "success",
+    token,
+    user,
+  });
 });
