@@ -43,6 +43,15 @@ const userSchema = new mongoose.Schema({
       message: "Password does not match",
     },
   },
+  role: {
+    type: String,
+    default: "user",
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
   passwordChangedAt: Date,
   resetPasswordToken: String,
   resetTokenExpiresIn: Date,
@@ -59,6 +68,22 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.correctPasswords = async (candidatePassword, password) => {
   return await bcrypt.compare(candidatePassword, password);
 };
+
+userSchema.methods.changedPasswordAfter = (JWTTimestamp) => {
+  if (this.passwordChangedAt) {
+    const convertPasswordChangedAt = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return convertPasswordChangedAt > JWTTimestamp;
+  }
+  return false;
+};
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 userSchema.methods.createResetToken = async function () {
   const resetToken = crypto.randomBytes(32).toString("hex");

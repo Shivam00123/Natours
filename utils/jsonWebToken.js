@@ -1,6 +1,7 @@
 const jsonwebtoken = require("jsonwebtoken");
 const ErrorHandler = require("./errorHandler");
 const util = require("util");
+const User = require("../models/userModel");
 
 class JsonToken {
   constructor(id) {
@@ -37,6 +38,29 @@ class JsonToken {
       return next(
         new ErrorHandler("Unauthorize, Please login to continue.", 401)
       );
+
+    //check if user still exists
+
+    const freshUser = await User.findById(verification.id);
+
+    if (!freshUser)
+      return next(
+        new ErrorHandler("User belonging to this token does not exist.", 401)
+      );
+
+    //check user changed the password after token is issued
+
+    if (freshUser.changedPasswordAfter(verification.iat)) {
+      return next(
+        new ErrorHandler(
+          "Password changed before token issued, Please login again!",
+          401
+        )
+      );
+    }
+
+    //Grant Access
+    req.user = freshUser;
     next();
   }
 }

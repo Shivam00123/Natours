@@ -6,15 +6,6 @@ const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
 const sendEmail = require("../utils/email");
 
-// const signJWTToken = (id) => {
-//   const jwtSecret = process.env.JWT_SECRET_TOKEN;
-//   const expiresIn = process.env.JWT_EXPIRATION_TIME;
-//   const token = jsonwebtoken.sign({ id }, jwtSecret, {
-//     expiresIn,
-//   });
-//   return token;
-// };
-
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
     name: req.body.name,
@@ -23,7 +14,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
     confirmPassword: req.body.confirmPassword,
     profile: req.body.profile,
   });
-  const token = await JsonToken.signToken(user._id);
+  const token = await new JsonToken(user._id).signToken();
   res.status(201).json({
     status: "success",
     token,
@@ -119,5 +110,43 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     status: "success",
     token,
     user,
+  });
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, password, confirmPassword } = req.body;
+  if (!currentPassword || !password || !confirmPassword) {
+    return next(new ErrorHandler("Please fill all the fields!", 400));
+  }
+  let user = await User.findById(req.user._id).select("+password");
+
+  if (!user) return next(new ErrorHandler("User not found", 400));
+  console.log({ user });
+
+  // check password
+  const checkPassword = await user.correctPasswords(
+    currentPassword,
+    user.password
+  );
+  if (!checkPassword) {
+    return next(
+      new ErrorHandler(
+        "Current password does not match with your old password",
+        401
+      )
+    );
+  }
+  //update password
+  user.password = password;
+  user.confirmPassword = confirmPassword;
+  user.passwordChangedAt = Date.now();
+  await user.save({ validateBeforeSave: true });
+
+  const token = await new JsonToken(user._id).signToken();
+
+  res.status(200).json({
+    status: "success",
+    token,
+    message: "Password updated successfully",
   });
 });

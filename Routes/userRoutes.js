@@ -14,6 +14,21 @@ userRouter.route("/forgotPassword").post(authController.forgotPassword);
 
 userRouter.route("/resetPassword/:token").patch(authController.resetPassword);
 
+userRouter
+  .route("/updatePassword")
+  .post(authController.isAuthenticated, authController.updatePassword);
+
+userRouter.patch(
+  "/updateMe",
+  authController.isAuthenticated,
+  userController.updateMe
+);
+userRouter.delete(
+  "/deleteMe",
+  authController.isAuthenticated,
+  userController.deleteMe
+);
+
 //Basic
 
 userRouter.route("/").get(userController.getUsers);
