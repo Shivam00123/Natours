@@ -18,9 +18,13 @@ tourRoutes
   .get(tourController.getAllTours)
   .post(tourController.createTour);
 
-tourRoutes.route("/get-stats").get(tourController.getTourStats);
+tourRoutes
+  .route("/get-stats")
+  .get(authController.isAuthenticated, tourController.getTourStats);
 
-tourRoutes.route("/get-yearlyStats/:year").get(tourController.getYearlyStats);
+tourRoutes
+  .route("/get-yearlyStats/:year")
+  .get(authController.isAuthenticated, tourController.getYearlyStats);
 
 tourRoutes
   .route("/:id")
