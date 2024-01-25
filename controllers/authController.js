@@ -13,13 +13,9 @@ exports.createUser = catchAsync(async (req, res, next) => {
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
     profile: req.body.profile,
+    role: req.body.role,
   });
-  const token = await new JsonToken(user._id).signToken();
-  res.status(201).json({
-    status: "success",
-    token,
-    user,
-  });
+  await new JsonToken(user._id).signToken(user, 201, res);
 });
 
 exports.loginUser = catchAsync(async (req, res, next) => {
@@ -36,12 +32,7 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email or password", 404));
   }
 
-  const token = await new JsonToken(user._id).signToken();
-  res.status(200).json({
-    status: "success",
-    token,
-    user,
-  });
+  await new JsonToken(user._id).signToken(user, 200, res);
 });
 
 exports.isAuthenticated = catchAsync(async (req, res, next) => {
@@ -105,12 +96,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   await user.save();
 
-  const token = await new JsonToken(user._id).signToken();
-  res.status(200).json({
-    status: "success",
-    token,
-    user,
-  });
+  await new JsonToken(user._id).signToken(user, 200, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -142,11 +128,21 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.passwordChangedAt = Date.now();
   await user.save({ validateBeforeSave: true });
 
-  const token = await new JsonToken(user._id).signToken();
-
-  res.status(200).json({
-    status: "success",
-    token,
-    message: "Password updated successfully",
-  });
+  await new JsonToken(user._id).signToken(user, 200, res);
 });
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // roles ['admin', 'lead-guide']. role='user'
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(
+          "You do not have permission to perform this action",
+          403
+        )
+      );
+    }
+
+    next();
+  };
+};

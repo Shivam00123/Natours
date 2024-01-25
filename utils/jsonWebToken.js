@@ -9,12 +9,39 @@ class JsonToken {
     this.token = "";
     this.jwtSecret = process.env.JWT_SECRET_TOKEN;
     this.expiresIn = process.env.JWT_EXPIRATION_TIME;
+    this.environment = process.env.NODE_ENV;
+    this.cookieExpiresIn = process.env.COOKIE_EXPIRES_IN;
   }
-  async signToken() {
+
+  cookieOptionsControl() {
+    const cookieOptions = {
+      expires: new Date(
+        Date.now() + this.cookieExpiresIn * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true, // browser cannot interact and modify the cookie
+    };
+    if (this.environment === "production") {
+      cookieOptions.secure = true;
+    }
+    console.log({ cookieOptions });
+    return cookieOptions;
+  }
+
+  async signToken(users, statusCode, res) {
     this.token = await jsonwebtoken.sign({ id: this.id }, this.jwtSecret, {
       expiresIn: this.expiresIn,
     });
-    return this.token;
+
+    res.cookie("jwt", this.token, this.cookieOptionsControl());
+    users.password = undefined;
+
+    res.status(statusCode).json({
+      status: "success",
+      token: this.token,
+      data: {
+        users,
+      },
+    });
   }
 
   async verifyToken(req, res, next) {

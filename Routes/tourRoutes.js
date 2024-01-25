@@ -1,8 +1,11 @@
 const express = require("express");
 const tourController = require("../controllers/tourController");
 const authController = require("../controllers/authController");
+const reviewRouter = require("../Routes/reviewRoutes");
 
 const tourRoutes = express.Router();
+
+tourRoutes.use("/:tourId/reviews", reviewRouter);
 
 //get top 5 tours
 tourRoutes
@@ -16,19 +19,42 @@ tourRoutes
 tourRoutes
   .route("/")
   .get(tourController.getAllTours)
-  .post(tourController.createTour);
+  .post(
+    authController.isAuthenticated,
+    authController.restrictTo("admin"),
+    tourController.createTour
+  );
 
 tourRoutes
   .route("/get-stats")
-  .get(authController.isAuthenticated, tourController.getTourStats);
+  .get(
+    authController.isAuthenticated,
+    authController.restrictTo("admin"),
+    authController.isAuthenticated,
+    tourController.getTourStats
+  );
 
 tourRoutes
   .route("/get-yearlyStats/:year")
-  .get(authController.isAuthenticated, tourController.getYearlyStats);
+  .get(
+    authController.isAuthenticated,
+    authController.restrictTo("admin"),
+    authController.isAuthenticated,
+    tourController.getYearlyStats
+  );
 
 tourRoutes
   .route("/:id")
   .get(tourController.getTourById)
-  .patch(tourController.updateTourById);
+  .patch(
+    authController.isAuthenticated,
+    authController.restrictTo("admin"),
+    tourController.updateTourById
+  )
+  .delete(
+    authController.isAuthenticated,
+    authController.restrictTo("admin"),
+    tourController.deleteTour
+  );
 
 module.exports = tourRoutes;
