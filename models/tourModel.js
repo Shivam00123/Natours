@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { default: slugify } = require("slugify");
 const validator = require("validator");
+const User = require("./userModel");
 
 const tours = new mongoose.Schema(
   {
@@ -34,7 +35,7 @@ const tours = new mongoose.Schema(
       type: String,
       required: [true, "A tour must have a Difficulty panel."],
       enum: {
-        values: ["Easy", "Difficult", "Medium"],
+        values: ["easy", "difficult", "medium"],
         message: "Difficulty is either: Easy , Medium or Difficult.",
       },
     },
@@ -72,7 +73,7 @@ const tours = new mongoose.Schema(
       type: String,
       required: [true, "A tour must have a Image Cover!"],
     },
-    images: String,
+    images: [String],
     createdAt: {
       type: Date,
       default: Date.now(),
@@ -86,6 +87,36 @@ const tours = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        description: String,
+        address: String,
+        day: Number,
+      },
+    ],
+    // guides: Array, for embedding User
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -98,10 +129,31 @@ tours.virtual("saving").get(function () {
   return Math.floor(saving) || 0;
 });
 
+tours.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
+});
+
 tours.pre("save", function (next) {
   this.slug = slugify(this.name);
   next();
 });
+
+tours.pre(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v -passwordChangedAt -role",
+  });
+  next();
+});
+
+//** Embedding User in tours */
+// tours.pre("save", async function (next) {
+//   const guidesPromise = this.guides.map(async (id) => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromise);
+//   next();
+// });
 
 const Tour = mongoose.model("Tour", tours);
 

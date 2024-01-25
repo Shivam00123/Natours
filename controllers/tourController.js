@@ -2,6 +2,7 @@ const Tour = require("../models/tourModel");
 const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
+const factory = require("./handlerFactory");
 
 exports.getBestTours = (req, res, next) => {
   req.query.limit = "5";
@@ -35,7 +36,7 @@ exports.createTour = catchAsync(async (req, res, next) => {
 });
 
 exports.getTourById = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate("reviews"); // populate will populate all the refrence fields
   if (!tour) return next(new ErrorHandler("No tour found!", 404));
   res.status(200).json({
     status: "success",
@@ -69,6 +70,8 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
     stats: tourStats,
   });
 });
+
+exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getYearlyStats = async (req, res, next) => {
   const year = req.params.year;

@@ -6,6 +6,8 @@ process.on("uncaughtException", () => {
   process.exit(1);
 });
 
+console.log(process.env.NODE_ENV);
+
 const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config.env" });

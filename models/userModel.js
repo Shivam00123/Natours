@@ -47,6 +47,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user",
   },
+  photo: String,
   active: {
     type: Boolean,
     default: true,
@@ -58,6 +59,9 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
+  if (this.role === "admin") {
+    this.role = "user";
+  }
   if (!this.isModified("password")) return next();
   const hashedPassword = await bcrypt.hash(this.password, 12);
   this.password = hashedPassword;
