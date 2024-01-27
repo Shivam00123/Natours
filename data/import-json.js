@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const fs = require("fs");
 const Tour = require("../models/tourModel");
+const Review = require("../models/reviewModel");
+const User = require("../models/userModel");
 
 const DB = `mongodb+srv://shivamrawat06994:${encodeURIComponent(
   "#9911011005@Mongo@#"
@@ -15,12 +17,14 @@ mongoose
     console.log("connection established successfully!");
   });
 
-const jsonFile = fs.readFileSync("./tours.json", "utf-8");
+const jsonFile = fs.readFileSync("./users.json", "utf-8");
 
 const importJSONToDB = async () => {
   try {
-    const tours = await Tour.create(JSON.parse(jsonFile));
-    console.log({ tours });
+    const docs = await User.create(JSON.parse(jsonFile), {
+      validateBeforeSave: false,
+    });
+    console.log({ docs });
   } catch (error) {
     console.log(error);
   }
@@ -28,7 +32,7 @@ const importJSONToDB = async () => {
 };
 const deleteDataFromDB = async () => {
   try {
-    await Tour.deleteMany();
+    await User.deleteMany();
   } catch (error) {
     console.log(error);
   }

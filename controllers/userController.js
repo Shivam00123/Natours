@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
+const factory = require("../controllers/handlerFactory");
 
 const filterNotAllowedValues = (obj, ...allowedValues) => {
   const filteredObject = {};
@@ -12,15 +13,6 @@ const filterNotAllowedValues = (obj, ...allowedValues) => {
   });
   return filteredObject;
 };
-
-exports.getUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: "success",
-    count: users.length,
-    users,
-  });
-});
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   const { password, confirmPassword } = req.body;
@@ -55,3 +47,12 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
+exports.getUsers = factory.getAllDocuments(User);
+
+exports.aboutMe = (req, res, next) => {
+  req.params.id = req.user._id;
+  next();
+};
+
+exports.getMyDetails = factory.findById(User);

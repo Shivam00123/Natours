@@ -124,6 +124,8 @@ const tours = new mongoose.Schema(
   }
 );
 
+tours.index({ price: 1, ratingsAverage: -1 }); //price->asc ra->desc
+
 tours.virtual("saving").get(function () {
   const saving = (this.price * this.priceDiscount) / 100;
   return Math.floor(saving) || 0;

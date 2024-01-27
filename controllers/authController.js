@@ -1,10 +1,11 @@
-const jsonwebtoken = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
 const sendEmail = require("../utils/email");
+
+
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
@@ -20,6 +21,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
 
 exports.loginUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+  console.log({ email, password });
   if (!email || !password) {
     return next(new ErrorHandler("Invalid email or password!", 400));
   }
@@ -144,5 +146,27 @@ exports.restrictTo = (...roles) => {
     }
 
     next();
+  };
+};
+
+exports.userAllowedOnlyWith = (...permitted) => {
+  return (Model) => {
+    return catchAsync(async (req, res, next) => {
+      const doc = await Model.findById(req.params.id);
+      if (!doc) return next(new ErrorHandler("No document found!", 404));
+
+      if (
+        JSON.stringify(req.user._id) !== JSON.stringify(doc.user._id) &&
+        !permitted.includes(req.user.role)
+      ) {
+        return next(
+          new ErrorHandler(
+            "You dont have permission to perform this action!",
+            400
+          )
+        );
+      }
+      next();
+    });
   };
 };

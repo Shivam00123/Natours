@@ -23,7 +23,6 @@ class JsonToken {
     if (this.environment === "production") {
       cookieOptions.secure = true;
     }
-    console.log({ cookieOptions });
     return cookieOptions;
   }
 
@@ -67,8 +66,8 @@ class JsonToken {
       );
 
     //check if user still exists
-
     const freshUser = await User.findById(verification.id);
+    console.log({ id: verification, freshUser });
 
     if (!freshUser)
       return next(

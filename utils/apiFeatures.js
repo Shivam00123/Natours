@@ -5,7 +5,7 @@ class APIFeatures {
   }
   filter() {
     const objectCopy = { ...this.queryObject };
-    const excludeFields = ["page", "sort", "limit", "fields"];
+    const excludeFields = ["page", "sort", "limit", "fields", "role"];
     excludeFields.forEach((el) => delete objectCopy[el]);
     let queryObjectToString = JSON.stringify(objectCopy);
     queryObjectToString = queryObjectToString.replace(
