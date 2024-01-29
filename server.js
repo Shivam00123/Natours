@@ -6,7 +6,7 @@ process.on("uncaughtException", () => {
   process.exit(1);
 });
 
-console.log(process.env.NODE_ENV);
+console.log(process.env.NODE_ENV + " environment");
 
 const dotenv = require("dotenv");
 
@@ -16,14 +16,9 @@ const DB = `mongodb+srv://shivamrawat06994:${encodeURIComponent(
   "#9911011005@Mongo@#"
 )}@cluster0.lge6wvg.mongodb.net/natours`;
 
-mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then((conn) => {
-    console.log("connection established successfully!");
-  });
+mongoose.connect(DB).then((_conn) => {
+  console.log("connection established successfully!");
+});
 
 const port = 3001;
 

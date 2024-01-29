@@ -35,13 +35,13 @@ const userSchema = new mongoose.Schema({
   },
   confirmPassword: {
     type: String,
-    required: [true, "Password does not match"],
-    validate: {
-      validator: function (value) {
-        return this.password === value;
-      },
-      message: "Password does not match",
-    },
+    // required: [true, "Password does not match"],
+    // validate: {
+    //   validator: function (value) {
+    //     return this.password === value;
+    //   },
+    //   message: "Password does not match",
+    // },
   },
   role: {
     type: String,

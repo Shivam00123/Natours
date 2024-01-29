@@ -2,9 +2,12 @@ const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 
-exports.deleteOne = (Model) => {
+exports.deleteOne = (Model, DeleteModel) => {
   return catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndDelete(req.params.id);
+    if (DeleteModel) {
+      await DeleteModel.deleteMany({ tour: req.params.id });
+    }
     if (!doc) return next(new ErrorHandler("No document find by this Id", 400));
 
     res.status(204).json({
@@ -15,12 +18,26 @@ exports.deleteOne = (Model) => {
   });
 };
 
+exports.deleteMany = (Model, query) => {
+  return catchAsync(async (req, res, next) => {
+    const queryObj = { [query]: req.params.id };
+    await Model.deleteMany(queryObj);
+    res.status(204).json({
+      status: "success",
+      data: null,
+      message: "No content",
+    });
+  });
+};
+
 exports.updateOne = (Model) => {
+  console.log("yes");
   return catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
+
     if (!doc) return next(new ErrorHandler("Invalid document Id", 404));
     res.status(200).json({
       status: "success",

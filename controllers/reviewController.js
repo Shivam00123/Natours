@@ -28,6 +28,8 @@ exports.updateReview = factory.updateOne(Review);
 
 exports.deleteReview = factory.deleteOne(Review);
 
+exports.deleteRelatedToTour = factory.deleteMany(Review, "tour");
+
 exports.ownerAndAdminOnlyPermission =
   factory.ownerAndAdminOnlyPermission(Review);
 

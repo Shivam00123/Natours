@@ -121,7 +121,7 @@ const tours = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 tours.index({ price: 1, ratingsAverage: -1 }); //price->asc ra->desc

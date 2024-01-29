@@ -1,3 +1,4 @@
+const Review = require("../models/reviewModel");
 const Tour = require("../models/tourModel");
 const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
@@ -76,4 +77,4 @@ exports.getTourById = factory.findById(Tour, { path: "reviews" });
 
 exports.updateTourById = factory.updateOne(Tour);
 
-exports.deleteTour = factory.deleteOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour, Review);

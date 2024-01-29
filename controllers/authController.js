@@ -5,8 +5,6 @@ const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
 const sendEmail = require("../utils/email");
 
-
-
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
     name: req.body.name,
@@ -21,7 +19,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
 
 exports.loginUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log({ email, password });
+
   if (!email || !password) {
     return next(new ErrorHandler("Invalid email or password!", 400));
   }
@@ -53,7 +51,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   user.save({ validateBeforeSave: false });
 
   const linkToResetPassword = `${req.protocol}://${req.get(
-    "host"
+    "host",
   )}/api/v1/users/resetPassword/${resetToken}`;
 
   const subject = "Your Password reset Token is valid for 10min";
@@ -109,19 +107,18 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   let user = await User.findById(req.user._id).select("+password");
 
   if (!user) return next(new ErrorHandler("User not found", 400));
-  console.log({ user });
 
   // check password
   const checkPassword = await user.correctPasswords(
     currentPassword,
-    user.password
+    user.password,
   );
   if (!checkPassword) {
     return next(
       new ErrorHandler(
         "Current password does not match with your old password",
-        401
-      )
+        401,
+      ),
     );
   }
   //update password
@@ -140,8 +137,8 @@ exports.restrictTo = (...roles) => {
       return next(
         new ErrorHandler(
           "You do not have permission to perform this action",
-          403
-        )
+          403,
+        ),
       );
     }
 
@@ -162,8 +159,8 @@ exports.userAllowedOnlyWith = (...permitted) => {
         return next(
           new ErrorHandler(
             "You dont have permission to perform this action!",
-            400
-          )
+            400,
+          ),
         );
       }
       next();
