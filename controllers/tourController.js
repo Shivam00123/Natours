@@ -1,6 +1,7 @@
 const Review = require("../models/reviewModel");
 const Tour = require("../models/tourModel");
 const catchAsync = require("../utils/catchAsync");
+const ErrorHandler = require("../utils/errorHandler");
 const factory = require("./handlerFactory");
 
 exports.getBestTours = (req, res, next) => {
@@ -68,6 +69,63 @@ exports.getYearlyStats = async (req, res, next) => {
     data: yearlyStats,
   });
 };
+
+exports.getTourWithinRadius = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [latitude, longitude] = latlng.split(",");
+  if (!latitude || !longitude) {
+    return next(new ErrorHandler("No cordinates provided!", 400));
+  }
+  const radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1;
+  const tours = await Tour.find({
+    startLocation: {
+      $geoWithin: { $centerSphere: [[longitude, latitude], radius] },
+    },
+  });
+  res.status(200).json({
+    status: "success",
+    count: tours.length,
+    data: {
+      data: tours,
+    },
+  });
+});
+
+exports.getTourNearest = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [latitude, longitude] = latlng.split(",");
+  if (!latitude || !longitude) {
+    return next(new ErrorHandler("No cordinates provided!", 400));
+  }
+
+  const multiplier = unit === "mi" ? 0.000621371 : 0.001;
+
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [longitude * 1, latitude * 1],
+        },
+        distanceField: "distance",
+        distanceMultiplier: multiplier,
+      },
+    },
+    {
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+  res.status(200).json({
+    status: "success",
+    count: distances.length,
+    data: {
+      data: distances,
+    },
+  });
+});
 
 exports.getAllTours = factory.getAllDocuments(Tour);
 

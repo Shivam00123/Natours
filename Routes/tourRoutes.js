@@ -59,4 +59,12 @@ tourRoutes
     tourController.deleteTour
   );
 
+tourRoutes
+  .route("/tour-within/:distance/center/:latlng/unit/:unit") // we need unit to calc the radian of earth
+  .get(tourController.getTourWithinRadius);
+
+tourRoutes
+  .route("/tour-nearest/:latlng/unit/:unit")
+  .get(tourController.getTourNearest);
+
 module.exports = tourRoutes;

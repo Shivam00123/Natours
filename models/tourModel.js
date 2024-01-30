@@ -121,10 +121,12 @@ const tours = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
 tours.index({ price: 1, ratingsAverage: -1 }); //price->asc ra->desc
+
+tours.index({ startLocation: "2dsphere" });
 
 tours.virtual("saving").get(function () {
   const saving = (this.price * this.priceDiscount) / 100;
