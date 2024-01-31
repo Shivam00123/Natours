@@ -8,6 +8,8 @@ const tourRoutes = express.Router();
 
 tourRoutes.use("/:tourId/reviews", reviewRouter);
 
+tourRoutes.route("/").get(tourController.getAllTours);
+
 tourRoutes.use(authController.isAuthenticated);
 
 //get top 5 tours
@@ -21,7 +23,6 @@ tourRoutes
 
 tourRoutes
   .route("/")
-  .get(tourController.getAllTours)
   .post(
     authController.restrictTo("admin", "lead-guides"),
     tourController.createTour

@@ -45,9 +45,8 @@ const tours = new mongoose.Schema(
       min: [1, "A tour must have a Rating more than or equal to  1.0"],
       max: [5, "A tour must have a Rating less than or eqaul to 5.0"],
     },
-    ratingsQauntity: {
+    ratingsQuantity: {
       type: Number,
-      default: 0,
     },
     priceDiscount: {
       type: Number,
@@ -140,7 +139,8 @@ tours.virtual("reviews", {
 });
 
 tours.pre("save", function (next) {
-  this.slug = slugify(this.name);
+  const name = this.name.toLowerCase();
+  this.slug = slugify(name);
   next();
 });
 

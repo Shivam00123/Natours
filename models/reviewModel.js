@@ -63,10 +63,13 @@ reviewSchema.statics.calcAvgRatings = async function (tourId) {
       },
     },
   ]);
-  await Tour.findByIdAndUpdate(tourId, {
-    ratingsQauntity: stats?.[0]?.reviewCount || 4.5,
-    ratingsAverage: stats?.[0]?.avgRating || 0,
-  });
+  if (tourId) {
+    console.log("called");
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQauntity: stats?.[0]?.reviewCount,
+      ratingsAverage: stats?.[0]?.avgRating,
+    });
+  }
 };
 
 reviewSchema.post("save", function () {

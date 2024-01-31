@@ -9,6 +9,7 @@ const hpp = require("hpp");
 const tourRoutes = require("./Routes/tourRoutes");
 const userRouter = require("./Routes/userRoutes");
 const reviewRouter = require("./Routes/reviewRoutes");
+const viewRouter = require("./Routes/viewRoutes");
 const ErrorHandler = require("./utils/errorHandler");
 const globalErrorHandler = require("./controllers/errorController");
 
@@ -21,12 +22,6 @@ app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
 //render components
-app.get("/", (req, res) => {
-  res.status(200).render("base", {
-    tour: "The Forest Hiker",
-    text: "This is a text",
-  });
-});
 
 // Body Parser
 app.use(express.json({ limit: "10kb" })); // so body of size upto 10kb is acceptable
@@ -65,6 +60,7 @@ app.use("/api", limiter); // this will affect all the api starts with /api
 //serving static files
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/", viewRouter);
 app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);
