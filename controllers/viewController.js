@@ -14,10 +14,19 @@ exports.renderTour = catchAsync(async (req, res, next) => {
   console.log({ slug: req.params.slug.toLowerCase() });
   const tour = await Tour.find({
     slug: req.params.slug.toLowerCase(),
-  }).populate("reviews");
+  }).populate({
+    path: "reviews",
+    select: "review user rating",
+  });
   console.log({ tour });
   res.status(200).render("tour", {
-    title: tour[0].name,
+    title: `${tour[0].name} Tour`,
     tour: tour[0],
   });
 });
+
+exports.signIn = (req, res) => {
+  res.status(200).render("signin", {
+    title: "Sign In",
+  });
+};
