@@ -4,7 +4,7 @@ const userController = require("../controllers/userController");
 
 const userRouter = express.Router();
 
-//Authentication
+//No Authentication required
 
 userRouter.route("/signup").post(authController.createUser);
 
@@ -14,23 +14,24 @@ userRouter.route("/forgotPassword").post(authController.forgotPassword);
 
 userRouter.route("/resetPassword/:token").patch(authController.resetPassword);
 
+//Auth Required
+userRouter.use(authController.isAuthenticated);
+
+userRouter.route("/updatePassword").post(authController.updatePassword);
+
+userRouter.patch("/updateMe", userController.updateMe);
+
+userRouter.delete("/", userController.deleteMe);
+
 userRouter
-  .route("/updatePassword")
-  .post(authController.isAuthenticated, authController.updatePassword);
+  .route("/me")
+  .get(userController.aboutMe, userController.getMyDetails);
 
-userRouter.patch(
-  "/updateMe",
-  authController.isAuthenticated,
-  userController.updateMe
-);
-userRouter.delete(
-  "/deleteMe",
-  authController.isAuthenticated,
-  userController.deleteMe
-);
-
-//Basic
+//Admin restricted Route
+userRouter.use(authController.restrictTo("admin"));
 
 userRouter.route("/").get(userController.getUsers);
+
+//Basic
 
 module.exports = userRouter;

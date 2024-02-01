@@ -1,4 +1,3 @@
-const jsonwebtoken = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
@@ -20,6 +19,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
 
 exports.loginUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+
   if (!email || !password) {
     return next(new ErrorHandler("Invalid email or password!", 400));
   }
@@ -51,7 +51,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   user.save({ validateBeforeSave: false });
 
   const linkToResetPassword = `${req.protocol}://${req.get(
-    "host"
+    "host",
   )}/api/v1/users/resetPassword/${resetToken}`;
 
   const subject = "Your Password reset Token is valid for 10min";
@@ -107,19 +107,18 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   let user = await User.findById(req.user._id).select("+password");
 
   if (!user) return next(new ErrorHandler("User not found", 400));
-  console.log({ user });
 
   // check password
   const checkPassword = await user.correctPasswords(
     currentPassword,
-    user.password
+    user.password,
   );
   if (!checkPassword) {
     return next(
       new ErrorHandler(
         "Current password does not match with your old password",
-        401
-      )
+        401,
+      ),
     );
   }
   //update password
@@ -138,11 +137,33 @@ exports.restrictTo = (...roles) => {
       return next(
         new ErrorHandler(
           "You do not have permission to perform this action",
-          403
-        )
+          403,
+        ),
       );
     }
 
     next();
+  };
+};
+
+exports.userAllowedOnlyWith = (...permitted) => {
+  return (Model) => {
+    return catchAsync(async (req, res, next) => {
+      const doc = await Model.findById(req.params.id);
+      if (!doc) return next(new ErrorHandler("No document found!", 404));
+
+      if (
+        JSON.stringify(req.user._id) !== JSON.stringify(doc.user._id) &&
+        !permitted.includes(req.user.role)
+      ) {
+        return next(
+          new ErrorHandler(
+            "You dont have permission to perform this action!",
+            400,
+          ),
+        );
+      }
+      next();
+    });
   };
 };

@@ -16,14 +16,13 @@ class JsonToken {
   cookieOptionsControl() {
     const cookieOptions = {
       expires: new Date(
-        Date.now() + this.cookieExpiresIn * 24 * 60 * 60 * 1000
+        Date.now() + this.cookieExpiresIn * 24 * 60 * 60 * 1000,
       ),
       httpOnly: true, // browser cannot interact and modify the cookie
     };
     if (this.environment === "production") {
       cookieOptions.secure = true;
     }
-    console.log({ cookieOptions });
     return cookieOptions;
   }
 
@@ -54,25 +53,24 @@ class JsonToken {
     }
     if (!this.token)
       return next(
-        new ErrorHandler("Unauthorize, Please login to continue.", 401)
+        new ErrorHandler("Unauthorize, Please login to continue.", 401),
       );
 
     const verification = await util.promisify(jsonwebtoken.verify)(
       this.token,
-      this.jwtSecret
+      this.jwtSecret,
     );
     if (!verification)
       return next(
-        new ErrorHandler("Unauthorize, Please login to continue.", 401)
+        new ErrorHandler("Unauthorize, Please login to continue.", 401),
       );
 
     //check if user still exists
-
     const freshUser = await User.findById(verification.id);
 
     if (!freshUser)
       return next(
-        new ErrorHandler("User belonging to this token does not exist.", 401)
+        new ErrorHandler("User belonging to this token does not exist.", 401),
       );
 
     //check user changed the password after token is issued
@@ -81,8 +79,8 @@ class JsonToken {
       return next(
         new ErrorHandler(
           "Password changed before token issued, Please login again!",
-          401
-        )
+          401,
+        ),
       );
     }
 

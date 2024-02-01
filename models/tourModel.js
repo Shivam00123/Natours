@@ -45,9 +45,8 @@ const tours = new mongoose.Schema(
       min: [1, "A tour must have a Rating more than or equal to  1.0"],
       max: [5, "A tour must have a Rating less than or eqaul to 5.0"],
     },
-    ratingsQauntity: {
+    ratingsQuantity: {
       type: Number,
-      default: 0,
     },
     priceDiscount: {
       type: Number,
@@ -124,6 +123,10 @@ const tours = new mongoose.Schema(
   }
 );
 
+tours.index({ price: 1, ratingsAverage: -1 }); //price->asc ra->desc
+
+tours.index({ startLocation: "2dsphere" });
+
 tours.virtual("saving").get(function () {
   const saving = (this.price * this.priceDiscount) / 100;
   return Math.floor(saving) || 0;
@@ -136,14 +139,15 @@ tours.virtual("reviews", {
 });
 
 tours.pre("save", function (next) {
-  this.slug = slugify(this.name);
+  const name = this.name.toLowerCase();
+  this.slug = slugify(name);
   next();
 });
 
 tours.pre(/^find/, function (next) {
   this.populate({
     path: "guides",
-    select: "-__v -passwordChangedAt -role",
+    select: "-__v -passwordChangedAt",
   });
   next();
 });

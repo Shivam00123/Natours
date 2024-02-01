@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -8,6 +9,7 @@ const hpp = require("hpp");
 const tourRoutes = require("./Routes/tourRoutes");
 const userRouter = require("./Routes/userRoutes");
 const reviewRouter = require("./Routes/reviewRoutes");
+const viewRouter = require("./Routes/viewRoutes");
 const ErrorHandler = require("./utils/errorHandler");
 const globalErrorHandler = require("./controllers/errorController");
 
@@ -15,6 +17,11 @@ const app = express();
 
 // Set security HTTP header
 app.use(helmet());
+
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
+//render components
 
 // Body Parser
 app.use(express.json({ limit: "10kb" })); // so body of size upto 10kb is acceptable
@@ -51,8 +58,9 @@ const limiter = rateLimit({
 app.use("/api", limiter); // this will affect all the api starts with /api
 
 //serving static files
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/", viewRouter);
 app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);

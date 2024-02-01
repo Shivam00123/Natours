@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Tour = require("./tourModel");
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -45,6 +46,46 @@ reviewSchema.pre(/^find/, function (next) {
     select: "name photo",
   });
   next();
+});
+
+reviewSchema.index({ user: 1, tour: 1 }, { unique: true }); // we want that 1 user can only post 1 review for each tour
+
+reviewSchema.statics.calcAvgRatings = async function (tourId) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: "$tour",
+        reviewCount: { $sum: 1 },
+        avgRating: { $avg: "$rating" },
+      },
+    },
+  ]);
+  if (tourId) {
+    console.log("called");
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQauntity: stats?.[0]?.reviewCount,
+      ratingsAverage: stats?.[0]?.avgRating,
+    });
+  }
+};
+
+reviewSchema.post("save", function () {
+  this.constructor.calcAvgRatings(this.tour); // this.contructor points to the parent which doc is created from -> model
+});
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  this.r = await this.findOne().clone();
+  this.r.ReviewUpdateAndDelete = true;
+  next();
+});
+
+reviewSchema.post("findOne", async function () {
+  if (this.r.ReviewUpdateAndDelete) {
+    this.r.constructor.calcAvgRatings(this.r.tour);
+  }
 });
 
 const Review = mongoose.model("Review", reviewSchema);
