@@ -1,8 +1,5 @@
 extends base 
-
-block append head 
-    script(src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js") 
-    link(href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet") 
+    
 
 
 mixin overviewBox(label,text,icon)
@@ -100,6 +97,4 @@ block content
                     button.btn.btn--green.span-all-rows Book tour now!
                 else
                     a.btn.btn--green.span-all-rows(href="/login") Login to book tour
-
-//- block append head 
-//-     script(src="/js/toursMap.js") 
+    script(src="/js/toursMap.js") 

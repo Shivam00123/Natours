@@ -59,6 +59,7 @@ exports.createOne = (Model) => {
 exports.findById = (Model, populateOptions) => {
   return catchAsync(async (req, res, next) => {
     let query = Model.findById(req.params.id);
+    if (!query) return next(new ErrorHandler("Document not found!"));
     if (populateOptions) query = query.populate(populateOptions);
     const doc = await query;
     if (!doc) return next(new ErrorHandler("No document found!", 404));

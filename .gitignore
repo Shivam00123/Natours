@@ -2,3 +2,5 @@
 /*.http
 /*.env
 /*.DS_Store
+/bundle.js
+/.cache

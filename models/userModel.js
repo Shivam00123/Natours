@@ -12,15 +12,12 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, "Please provide an email!"],
+    required: [true, "Please provide your email"],
     unique: true,
-    validate: {
-      validator: function (value) {
-        return validator.isEmail;
-      },
-      message: "Invalid email, Please provide a valid email.",
-    },
+    lowercase: true,
+    validate: [validator.isEmail, "Please provide a valid email"],
   },
+
   profile: {
     type: String,
   },
@@ -35,13 +32,13 @@ const userSchema = new mongoose.Schema({
   },
   confirmPassword: {
     type: String,
-    // required: [true, "Password does not match"],
-    // validate: {
-    //   validator: function (value) {
-    //     return this.password === value;
-    //   },
-    //   message: "Password does not match",
-    // },
+    required: [true, "Password does not match"],
+    validate: {
+      validator: function (value) {
+        return this.password === value;
+      },
+      message: "Password does not match",
+    },
   },
   role: {
     type: String,

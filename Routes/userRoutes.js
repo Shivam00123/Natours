@@ -10,6 +10,8 @@ userRouter.route("/signup").post(authController.createUser);
 
 userRouter.route("/signin").post(authController.loginUser);
 
+userRouter.route("/signout").get(authController.logout);
+
 userRouter.route("/forgotPassword").post(authController.forgotPassword);
 
 userRouter.route("/resetPassword/:token").patch(authController.resetPassword);

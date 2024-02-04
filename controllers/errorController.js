@@ -1,26 +1,44 @@
 const ErrorHandler = require("../utils/errorHandler");
 
-const errorOnDevelopment = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-    stack: err.stack,
-    error: err,
-  });
-};
-
-const errorOnProduction = (err, res) => {
-  if (!err.isOperational) {
-    res.status(500).json({
-      status: "error",
-      message: "Something went wrong!",
+const errorOnDevelopment = (err, req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      stack: err.stack,
+      error: err,
     });
   } else {
-    res.status(err.statusCode).json({
+    res.status(err.statusCode).render("error", {
+      title: "Something went wrong!",
+      msg: err.message,
+    });
+  }
+};
+
+const errorOnProduction = (err, req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    if (!err.isOperational) {
+      res.status(500).json({
+        status: "error",
+        message: "Something went wrong!",
+      });
+    }
+    return res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   }
+  if (err.isOperational) {
+    return res.status(err.statusCode).render("error", {
+      title: "Something went wrong!",
+      msg: err.message,
+    });
+  }
+  return res.status(err.statusCode).render("error", {
+    title: "Something went wrong!",
+    msg: "Try again later!",
+  });
 };
 
 const handleCastError = (err) => {
@@ -63,8 +81,8 @@ module.exports = (err, req, res, next) => {
   }
 
   if (process.env.NODE_ENV === "production") {
-    errorOnProduction(error, res);
+    errorOnProduction(error, req, res);
   } else if (process.env.NODE_ENV === "development") {
-    errorOnDevelopment(error, res);
+    errorOnDevelopment(error, req, res);
   }
 };

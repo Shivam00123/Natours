@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
 
 const tourRoutes = require("./Routes/tourRoutes");
 const userRouter = require("./Routes/userRoutes");
@@ -16,7 +17,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const app = express();
 
 // Set security HTTP header
-app.use(helmet());
+// app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
@@ -25,6 +26,8 @@ app.set("views", path.join(__dirname, "views"));
 
 // Body Parser
 app.use(express.json({ limit: "10kb" })); // so body of size upto 10kb is acceptable
+app.use(cookieParser()); // parser the incoming cookie on every request
+app.use(express.urlencoded({ extended: true, limit: "10kb" })); // to grab the form submit data that comes in urlencoded format
 
 app.use(mongoSanitize()); // it removes all the $ sign from req.body so no one can inject some query on the req body
 

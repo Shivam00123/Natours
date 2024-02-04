@@ -1,12 +1,17 @@
 const express = require("express");
 const viewController = require("../controllers/viewController");
+const authController = require("../controllers/authController");
 
 const Router = express.Router();
 
-Router.get("/", viewController.renderOverview);
+Router.get("/", authController.isLoggedIn, viewController.renderOverview);
 
-Router.get("/tour/:slug", viewController.renderTour);
+Router.get("/tour/:slug", authController.isLoggedIn, viewController.renderTour);
 
-Router.get("/signin", viewController.signIn);
+Router.get("/signin", authController.isLoggedIn, viewController.signIn);
+
+// Router.use(authController.isAuthenticated);
+
+Router.get("/me", authController.isAuthenticated, viewController.getMe);
 
 module.exports = Router;

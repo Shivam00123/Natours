@@ -15,8 +15,8 @@ class JsonToken {
 
   cookieOptionsControl() {
     const cookieOptions = {
-      expires: new Date(
-        Date.now() + this.cookieExpiresIn * 24 * 60 * 60 * 1000,
+      expiresIn: new Date(
+        Date.now() + this.cookieExpiresIn * 24 * 60 * 60 * 1000
       ),
       httpOnly: true, // browser cannot interact and modify the cookie
     };
@@ -50,19 +50,21 @@ class JsonToken {
       req.headers.authorization.startsWith("Bearer")
     ) {
       this.token = req.headers.authorization.split(" ")[1];
+    } else if (req.cookies.jwt) {
+      this.token = req.cookies.jwt;
     }
     if (!this.token)
       return next(
-        new ErrorHandler("Unauthorize, Please login to continue.", 401),
+        new ErrorHandler("Unauthorize, Please login to continue.", 401)
       );
 
     const verification = await util.promisify(jsonwebtoken.verify)(
       this.token,
-      this.jwtSecret,
+      this.jwtSecret
     );
     if (!verification)
       return next(
-        new ErrorHandler("Unauthorize, Please login to continue.", 401),
+        new ErrorHandler("Unauthorize, Please login to continue.", 401)
       );
 
     //check if user still exists
@@ -70,7 +72,7 @@ class JsonToken {
 
     if (!freshUser)
       return next(
-        new ErrorHandler("User belonging to this token does not exist.", 401),
+        new ErrorHandler("User belonging to this token does not exist.", 401)
       );
 
     //check user changed the password after token is issued
@@ -79,14 +81,41 @@ class JsonToken {
       return next(
         new ErrorHandler(
           "Password changed before token issued, Please login again!",
-          401,
-        ),
+          401
+        )
       );
     }
 
     //Grant Access
     req.user = freshUser;
     next();
+  }
+
+  async isLoggedIn(req, res, next) {
+    if (req.cookies.jwt) {
+      const verification = await util.promisify(jsonwebtoken.verify)(
+        req.cookies.jwt,
+        this.jwtSecret
+      );
+      if (!verification) next();
+      const freshUser = await User.findById(verification.id);
+      if (!freshUser) next();
+      if (freshUser.changedPasswordAfter(verification.iat)) {
+        return next();
+      }
+      res.locals.user = freshUser;
+    }
+    next();
+  }
+
+  logout(req, res, next) {
+    res.cookie("jwt", "loggedOut", {
+      expiresIn: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+    res.status(200).json({
+      status: "success",
+    });
   }
 }
 

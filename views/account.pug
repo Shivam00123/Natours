@@ -1,0 +1,58 @@
+extends base 
+
+mixin list(icon,label,active)
+    li(class=`side-nav--${active ? "active" : ""}`)
+        a(href='#')
+            svg
+                use(xlink:href=`img/icons.svg#icon-${icon}`)
+            | #{label}
+
+
+block content
+    main.main
+        .user-view
+            nav.user-view__menu
+                ul.side-nav
+                    +list("settings","Settings",true)
+                    +list("briefcase","My bookings")
+                    +list("star","My reviews")
+                    +list("credit-card","Billing")
+                - if(user.role === "admin")
+                    .admin-nav
+                        h5.admin-nav__heading Admin
+                        ul.side-nav
+                            +list("map","Manage tours")
+                            +list("users","Manage users")
+                            +list("star","Manage reviews")
+                            +list("briefcase","Manage bookings")
+
+            .user-view__content
+                .user-view__form-container
+                    h2.heading-secondary.ma-bt-md Your account settings
+                    form#userData_form.form.form-user-data
+                        .form__group
+                            label.form__label(for='name') Name
+                            input#name.form__input(type='text', value=`${user.name}`, required)
+                        .form__group.ma-bt-md
+                            label.form__label(for='email') Email
+                            input#email.form__input(type='email', value=`${user.email}`, required)
+                        .form__group.form__photo-upload
+                            img.form__user-photo(src=`img/users/${user.photo}`, alt=`${user.name} photo`)
+                            a.btn-text(href='') Choose new photo
+                        .form__group.right
+                            button.btn.btn--small.btn--green Save settings
+                .line &nbsp;
+                .user-view__form-container
+                    h2.heading-secondary.ma-bt-md Password change
+                    form#update_password_form.form.form-user-settings
+                        .form__group
+                            label.form__label(for='password-current') Current password
+                            input#password-current.form__input(type='password', placeholder='••••••••', required, minlength='8')
+                        .form__group
+                            label.form__label(for='password') New password
+                            input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')
+                        .form__group.ma-bt-lg
+                            label.form__label(for='password-confirm') Confirm password
+                            input#password-confirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
+                        .form__group.right
+                            button#update_password_btn.btn.btn--small.btn--green Save password

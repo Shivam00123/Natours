@@ -39,6 +39,18 @@ exports.isAuthenticated = catchAsync(async (req, res, next) => {
   await new JsonToken().verifyToken(req, res, next);
 });
 
+exports.isLoggedIn = async (req, res, next) => {
+  try {
+    await new JsonToken().isLoggedIn(req, res, next);
+  } catch (err) {
+    next();
+  }
+};
+
+exports.logout = (req, res) => {
+  new JsonToken().logout(req, res);
+};
+
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   //get user with email;
   const { email } = req.body;
@@ -51,7 +63,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   user.save({ validateBeforeSave: false });
 
   const linkToResetPassword = `${req.protocol}://${req.get(
-    "host",
+    "host"
   )}/api/v1/users/resetPassword/${resetToken}`;
 
   const subject = "Your Password reset Token is valid for 10min";
@@ -111,14 +123,14 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // check password
   const checkPassword = await user.correctPasswords(
     currentPassword,
-    user.password,
+    user.password
   );
   if (!checkPassword) {
     return next(
       new ErrorHandler(
         "Current password does not match with your old password",
-        401,
-      ),
+        401
+      )
     );
   }
   //update password
@@ -137,8 +149,8 @@ exports.restrictTo = (...roles) => {
       return next(
         new ErrorHandler(
           "You do not have permission to perform this action",
-          403,
-        ),
+          403
+        )
       );
     }
 
@@ -159,8 +171,8 @@ exports.userAllowedOnlyWith = (...permitted) => {
         return next(
           new ErrorHandler(
             "You dont have permission to perform this action!",
-            400,
-          ),
+            400
+          )
         );
       }
       next();
