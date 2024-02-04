@@ -6781,9 +6781,6 @@ var loginUser = exports.loginUser = /*#__PURE__*/function () {
           });
         case 2:
           response = _context.sent;
-          console.log({
-            response: response
-          });
           (0, _alert.Alert)("success", "Welcome back ".concat(response.data.users.name));
           if (response.status === "success") {
             window.setTimeout(function () {
@@ -6792,7 +6789,7 @@ var loginUser = exports.loginUser = /*#__PURE__*/function () {
           } else {
             (0, _alert.Alert)("error", response.message);
           }
-        case 6:
+        case 5:
         case "end":
           return _context.stop();
       }
@@ -6879,39 +6876,37 @@ function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyri
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 var updateNameOrEmail = exports.updateNameOrEmail = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(name, email) {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(data) {
     var response;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          if (!(!name && !email)) {
-            _context.next = 2;
-            break;
-          }
-          return _context.abrupt("return", (0, _alert.Alert)("error", "Please provide a name or email to update"));
-        case 2:
-          _context.next = 4;
-          return (0, _fetchApi.patch_fetchAPI)("users/updateMe", {
-            name: name,
-            email: email
+          _context.next = 2;
+          return axios({
+            method: "PATCH",
+            url: "http://localhost:3001/api/v1/users/updateMe",
+            data: data
           });
-        case 4:
+        case 2:
           response = _context.sent;
-          if (response.status === "success") {
+          console.log({
+            response: response
+          });
+          if (response.data.status === "success") {
             (0, _alert.Alert)("success", "Settings Updated!");
             window.setTimeout(function () {
               location.reload(true);
             }, 1600);
           } else {
-            (0, _alert.Alert)("error", response.message);
+            (0, _alert.Alert)("error", response.data.message);
           }
-        case 6:
+        case 5:
         case "end":
           return _context.stop();
       }
     }, _callee);
   }));
-  return function updateNameOrEmail(_x, _x2) {
+  return function updateNameOrEmail(_x) {
     return _ref.apply(this, arguments);
   };
 }();
@@ -6948,7 +6943,7 @@ var changePassword = exports.changePassword = /*#__PURE__*/function () {
       }
     }, _callee2);
   }));
-  return function changePassword(_x3, _x4, _x5) {
+  return function changePassword(_x2, _x3, _x4) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -7114,13 +7109,16 @@ if (logoutButton) {
 }
 if (userData_form) {
   userData_form.addEventListener("submit", function (e) {
-    var _email, _name;
     e.preventDefault();
     var email = document.getElementById("email").value;
     var name = document.getElementById("name").value;
-    email = (_email = email) === null || _email === void 0 ? void 0 : _email.trim();
-    name = (_name = name) === null || _name === void 0 ? void 0 : _name.trim();
-    (0, _updateSetting.updateNameOrEmail)(name, email);
+    var photo = document.getElementById("photo");
+    console.log(photo.files);
+    var form = new FormData();
+    form.append("name", name);
+    form.append("email", email);
+    form.append("photo", document.getElementById("photo").files[0]);
+    (0, _updateSetting.updateNameOrEmail)(form);
   });
 }
 if (update_password_form) {

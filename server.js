@@ -6,8 +6,6 @@ process.on("uncaughtException", () => {
   process.exit(1);
 });
 
-console.log(process.env.NODE_ENV + " environment");
-
 const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config.env" });
@@ -27,7 +25,7 @@ const server = app.listen(port, () => {
 });
 
 process.on("unhandledRejection", () => {
-  console.log("unhandled Rejecrion");
+  console.log("unhandled Rejection");
   server.close(() => {
     process.exit(1);
   });

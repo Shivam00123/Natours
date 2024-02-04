@@ -3,7 +3,6 @@ import { Alert } from "./alert";
 
 export const loginUser = async (email, password) => {
   const response = await post_fetchAPI("users/signin", { email, password });
-  console.log({ response });
   Alert("success", `Welcome back ${response.data.users.name}`);
   if (response.status === "success") {
     window.setTimeout(() => {

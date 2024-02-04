@@ -1,19 +1,22 @@
 import { patch_fetchAPI, post_fetchAPI } from "../../utils/fetchApi";
 import { Alert } from "./alert";
 
-export const updateNameOrEmail = async (name, email) => {
-  if (!name && !email) {
-    return Alert("error", "Please provide a name or email to update");
-  }
-  const response = await patch_fetchAPI("users/updateMe", { name, email });
+export const updateNameOrEmail = async (data) => {
+  const response = await axios({
+    method: "PATCH",
+    url: "http://localhost:3001/api/v1/users/updateMe",
+    data,
+  });
 
-  if (response.status === "success") {
+  console.log({ response });
+
+  if (response.data.status === "success") {
     Alert("success", "Settings Updated!");
     window.setTimeout(() => {
       location.reload(true);
     }, 1600);
   } else {
-    Alert("error", response.message);
+    Alert("error", response.data.message);
   }
 };
 

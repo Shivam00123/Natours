@@ -1,4 +1,5 @@
 const express = require("express");
+
 const authController = require("../controllers/authController");
 const userController = require("../controllers/userController");
 
@@ -21,7 +22,12 @@ userRouter.use(authController.isAuthenticated);
 
 userRouter.route("/updatePassword").post(authController.updatePassword);
 
-userRouter.patch("/updateMe", userController.updateMe);
+userRouter.patch(
+  "/updateMe",
+  userController.uploadUserImage,
+  userController.reszieUserImage,
+  userController.updateMe
+);
 
 userRouter.delete("/", userController.deleteMe);
 

@@ -33,9 +33,13 @@ if (userData_form) {
     e.preventDefault();
     let email = document.getElementById("email").value;
     let name = document.getElementById("name").value;
-    email = email?.trim();
-    name = name?.trim();
-    updateNameOrEmail(name, email);
+    let photo = document.getElementById("photo");
+    console.log(photo.files);
+    const form = new FormData();
+    form.append("name", name);
+    form.append("email", email);
+    form.append("photo", document.getElementById("photo").files[0]);
+    updateNameOrEmail(form);
   });
 }
 

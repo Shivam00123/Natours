@@ -45,7 +45,6 @@ const updateAllPasswords = () => {
     const ssl = el.name.toLowerCase();
     el["slug"] = slugify(ssl);
   });
-  console.log({ file });
   fs.writeFileSync("./tours.json", JSON.stringify(file));
 };
 
