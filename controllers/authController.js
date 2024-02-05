@@ -3,7 +3,7 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
-const sendEmail = require("../utils/email");
+const Email = require("../utils/email");
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
@@ -14,6 +14,10 @@ exports.createUser = catchAsync(async (req, res, next) => {
     profile: req.body.profile,
     role: req.body.role,
   });
+  await new Email(
+    user,
+    `${req.protocol}://${req.get("host")}/me`
+  ).sendWelcome();
   await new JsonToken(user._id).signToken(user, 201, res);
 });
 
@@ -69,22 +73,22 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const subject = "Your Password reset Token is valid for 10min";
   const message = `Forgot your password? Submit a patch request with your new password and confirmPassword to ${linkToResetPassword}.\nif you didn't forget your password, Please ignore this email.`;
 
-  try {
-    await sendEmail({
-      email: user.email,
-      subject,
-      message,
-    });
-    res.status(200).json({
-      status: "success",
-      message: "Token sent to mail.",
-    });
-  } catch (error) {
-    this.resetPasswordToken = undefined;
-    this.resetTokenExpiresIn = undefined;
-    user.save({ validateBeforeSave: false });
-    return next(new ErrorHandler("Something went wrong, Try again later", 500));
-  }
+  // try {
+  //   await sendEmail({
+  //     email: user.email,
+  //     subject,
+  //     message,
+  //   });
+  //   res.status(200).json({
+  //     status: "success",
+  //     message: "Token sent to mail.",
+  //   });
+  // } catch (error) {
+  //   this.resetPasswordToken = undefined;
+  //   this.resetTokenExpiresIn = undefined;
+  //   user.save({ validateBeforeSave: false });
+  //   return next(new ErrorHandler("Something went wrong, Try again later", 500));
+  // }
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {

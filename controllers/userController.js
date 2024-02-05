@@ -93,16 +93,16 @@ const upload = multer({
 
 exports.uploadUserImage = upload.single("photo");
 
-exports.reszieUserImage = (req, res, next) => {
+exports.reszieUserImage = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
   req.file.filename = `user-${req.user._id}-${Date.now()}.jpeg`; //why because when we keep the image in memory we loose its details
 
-  sharp(req.file.buffer) // buffer will be provided
+  await sharp(req.file.buffer) // buffer will be provided
     .resize(500, 500) // sqaure
     .toFormat("jpeg")
     .jpeg({ quality: 90 }) //retain 90% quality
     .toFile(`public/img/users/${req.file.filename}`); // destination
 
   next();
-};
+});
