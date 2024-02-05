@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const Email = require("../utils/email");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -53,6 +54,12 @@ const userSchema = new mongoose.Schema({
     default: true,
     select: false,
   },
+  oneTimePassword: { type: String, select: false },
+  otpVerification: {
+    type: Boolean,
+    default: false,
+    select: false,
+  },
   passwordChangedAt: Date,
   resetPasswordToken: String,
   resetTokenExpiresIn: Date,
@@ -66,6 +73,11 @@ userSchema.pre("save", async function (next) {
   const hashedPassword = await bcrypt.hash(this.password, 12);
   this.password = hashedPassword;
   this.confirmPassword = undefined;
+  const OTP = String(Math.floor(100000 + Math.random() * 900000));
+  const user = { name: this.name, email: this.email };
+  this.oneTimePassword = crypto.createHash("sha256").update(OTP).digest("hex");
+  await new Email(user).sendOTP(OTP);
+
   next();
 });
 

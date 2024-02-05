@@ -39,3 +39,15 @@ exports.getMe = (req, res) => {
     user,
   });
 };
+
+exports.signUp = (req, res) => {
+  res.status(200).render("signup", {
+    title: "Register",
+  });
+};
+
+exports.verifyOTP = (req, res) => {
+  res.status(200).render("otp_verify", {
+    title: "Verification",
+  });
+};

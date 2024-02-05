@@ -14,11 +14,9 @@ exports.createUser = catchAsync(async (req, res, next) => {
     profile: req.body.profile,
     role: req.body.role,
   });
-  await new Email(
-    user,
-    `${req.protocol}://${req.get("host")}/me`
-  ).sendWelcome();
-  await new JsonToken(user._id).signToken(user, 201, res);
+  res.status(200).json({
+    status: "success",
+  });
 });
 
 exports.loginUser = catchAsync(async (req, res, next) => {
@@ -183,3 +181,23 @@ exports.userAllowedOnlyWith = (...permitted) => {
     });
   };
 };
+
+exports.verifyUserOTP = catchAsync(async (req, res, next) => {
+  const { OTP } = req.body;
+  const user_OTP = String(
+    crypto.createHash("sha256").update(OTP).digest("hex")
+  );
+  const user = await User.findOne({ oneTimePassword: user_OTP });
+  if (!user)
+    return next(
+      new ErrorHandler(
+        "Invalid OTP, Please provide a valid OTP sent on your email",
+        400
+      )
+    );
+  console.log({ user });
+  user.oneTimePassword = undefined;
+  user.otpVerification = true;
+  await user.save({ validateBeforeSave: false });
+  await new JsonToken(user._id).signToken(user, 201, res);
+});

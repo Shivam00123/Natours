@@ -33,6 +33,8 @@ class JsonToken {
 
     res.cookie("jwt", this.token, this.cookieOptionsControl());
     users.password = undefined;
+    users.oneTimePassword = undefined;
+    users.otpVerification = undefined;
 
     res.status(statusCode).json({
       status: "success",
@@ -103,6 +105,7 @@ class JsonToken {
       if (freshUser.changedPasswordAfter(verification.iat)) {
         return next();
       }
+      req.user = freshUser;
       res.locals.user = freshUser;
     }
     next();
