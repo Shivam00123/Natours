@@ -2,3 +2,6 @@
 /*.http
 /*.env
 /*.DS_Store
+public/js/bundle.js
+/.cache
+public/js/bundle.map.js

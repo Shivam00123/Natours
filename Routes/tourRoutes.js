@@ -52,6 +52,8 @@ tourRoutes
   .patch(
     authController.isAuthenticated,
     authController.restrictTo("admin", "lead-guide"),
+    tourController.tourFileUploads,
+    tourController.resizeTourImages,
     tourController.updateTourById
   )
   .delete(

@@ -1,4 +1,5 @@
 const express = require("express");
+
 const authController = require("../controllers/authController");
 const userController = require("../controllers/userController");
 
@@ -10,6 +11,8 @@ userRouter.route("/signup").post(authController.createUser);
 
 userRouter.route("/signin").post(authController.loginUser);
 
+userRouter.route("/signout").get(authController.logout);
+
 userRouter.route("/forgotPassword").post(authController.forgotPassword);
 
 userRouter.route("/resetPassword/:token").patch(authController.resetPassword);
@@ -19,7 +22,12 @@ userRouter.use(authController.isAuthenticated);
 
 userRouter.route("/updatePassword").post(authController.updatePassword);
 
-userRouter.patch("/updateMe", userController.updateMe);
+userRouter.patch(
+  "/updateMe",
+  userController.uploadUserImage,
+  userController.reszieUserImage,
+  userController.updateMe
+);
 
 userRouter.delete("/", userController.deleteMe);
 

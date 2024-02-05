@@ -3,7 +3,7 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
-const sendEmail = require("../utils/email");
+const Email = require("../utils/email");
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
@@ -14,6 +14,10 @@ exports.createUser = catchAsync(async (req, res, next) => {
     profile: req.body.profile,
     role: req.body.role,
   });
+  await new Email(
+    user,
+    `${req.protocol}://${req.get("host")}/me`
+  ).sendWelcome();
   await new JsonToken(user._id).signToken(user, 201, res);
 });
 
@@ -39,6 +43,18 @@ exports.isAuthenticated = catchAsync(async (req, res, next) => {
   await new JsonToken().verifyToken(req, res, next);
 });
 
+exports.isLoggedIn = async (req, res, next) => {
+  try {
+    await new JsonToken().isLoggedIn(req, res, next);
+  } catch (err) {
+    next();
+  }
+};
+
+exports.logout = (req, res) => {
+  new JsonToken().logout(req, res);
+};
+
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   //get user with email;
   const { email } = req.body;
@@ -51,28 +67,28 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   user.save({ validateBeforeSave: false });
 
   const linkToResetPassword = `${req.protocol}://${req.get(
-    "host",
+    "host"
   )}/api/v1/users/resetPassword/${resetToken}`;
 
   const subject = "Your Password reset Token is valid for 10min";
   const message = `Forgot your password? Submit a patch request with your new password and confirmPassword to ${linkToResetPassword}.\nif you didn't forget your password, Please ignore this email.`;
 
-  try {
-    await sendEmail({
-      email: user.email,
-      subject,
-      message,
-    });
-    res.status(200).json({
-      status: "success",
-      message: "Token sent to mail.",
-    });
-  } catch (error) {
-    this.resetPasswordToken = undefined;
-    this.resetTokenExpiresIn = undefined;
-    user.save({ validateBeforeSave: false });
-    return next(new ErrorHandler("Something went wrong, Try again later", 500));
-  }
+  // try {
+  //   await sendEmail({
+  //     email: user.email,
+  //     subject,
+  //     message,
+  //   });
+  //   res.status(200).json({
+  //     status: "success",
+  //     message: "Token sent to mail.",
+  //   });
+  // } catch (error) {
+  //   this.resetPasswordToken = undefined;
+  //   this.resetTokenExpiresIn = undefined;
+  //   user.save({ validateBeforeSave: false });
+  //   return next(new ErrorHandler("Something went wrong, Try again later", 500));
+  // }
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
@@ -111,14 +127,14 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // check password
   const checkPassword = await user.correctPasswords(
     currentPassword,
-    user.password,
+    user.password
   );
   if (!checkPassword) {
     return next(
       new ErrorHandler(
         "Current password does not match with your old password",
-        401,
-      ),
+        401
+      )
     );
   }
   //update password
@@ -137,8 +153,8 @@ exports.restrictTo = (...roles) => {
       return next(
         new ErrorHandler(
           "You do not have permission to perform this action",
-          403,
-        ),
+          403
+        )
       );
     }
 
@@ -159,8 +175,8 @@ exports.userAllowedOnlyWith = (...permitted) => {
         return next(
           new ErrorHandler(
             "You dont have permission to perform this action!",
-            400,
-          ),
+            400
+          )
         );
       }
       next();

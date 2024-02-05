@@ -2,9 +2,9 @@ head
   block head
     meta(charset='UTF-8')
     meta(name='viewport' content='width=device-width, initial-scale=1.0')
-    //meta(http-equiv="Content-Security-Policy" content="script-src 'self' api.mapbox.com;worker-src blob: ;connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com")
     link(href='https://fonts.googleapis.com/css?family=Lato:300,300i,700' rel='stylesheet')
-    
+    script(src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js") 
+    link(href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet") 
     link(rel='stylesheet' href='/css/style.css')
     link(rel='shortcut icon' type='image/png' href='/img/favicon.png')
     title Natours | #{title}
@@ -14,8 +14,7 @@ body
     h1 This a placeholder block
   include _footer
 
-  
-  script(src="/js/toursMap.js") 
-  script(src="/js/signIn.js") 
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js" integrity="sha512-NQfB/bDaB8kaSXF8E77JjhHG5PM6XVRxvHzkZiwl3ddWCEPBa23T76MuWSwAJdMGJnmQqM0VeY9kFszsrBEFrQ==" crossorigin="anonymous" referrerpolicy="no-referrer")
+  script(src="/js/bundle.js") 
   
   
