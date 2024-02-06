@@ -53,6 +53,19 @@ exports.isLoggedIn = async (req, res, next) => {
   }
 };
 
+exports.restrictedRoutes = async (req, res, next) => {
+  try {
+    const state = await new JsonToken().loggedInState(req, res, next);
+    if (state) {
+      res.status(301).redirect("/");
+    } else {
+      next();
+    }
+  } catch (error) {
+    next();
+  }
+};
+
 exports.logout = (req, res) => {
   new JsonToken().logout(req, res);
 };
@@ -72,25 +85,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     "host"
   )}/api/v1/users/resetPassword/${resetToken}`;
 
-  const subject = "Your Password reset Token is valid for 10min";
-  const message = `Forgot your password? Submit a patch request with your new password and confirmPassword to ${linkToResetPassword}.\nif you didn't forget your password, Please ignore this email.`;
-
-  // try {
-  //   await sendEmail({
-  //     email: user.email,
-  //     subject,
-  //     message,
-  //   });
-  //   res.status(200).json({
-  //     status: "success",
-  //     message: "Token sent to mail.",
-  //   });
-  // } catch (error) {
-  //   this.resetPasswordToken = undefined;
-  //   this.resetTokenExpiresIn = undefined;
-  //   user.save({ validateBeforeSave: false });
-  //   return next(new ErrorHandler("Something went wrong, Try again later", 500));
-  // }
+  await new Email(user, linkToResetPassword).sendPasswordReset();
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {

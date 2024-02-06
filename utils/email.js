@@ -60,4 +60,10 @@ module.exports = class Email {
     };
     await this.newTransport().sendMail(mailOptions);
   }
+  async sendPasswordReset() {
+    await this.send(
+      "resetPassword",
+      "Your password reset token. (valid for only 10 minutes)"
+    );
+  }
 };

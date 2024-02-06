@@ -8,11 +8,16 @@ Router.get("/", authController.isLoggedIn, viewController.renderOverview);
 
 Router.get("/tour/:slug", authController.isLoggedIn, viewController.renderTour);
 
-Router.get("/signin", authController.isLoggedIn, viewController.signIn);
+Router.get("/signin", authController.restrictedRoutes, viewController.signIn);
 
-Router.get("/signup", viewController.signUp);
+Router.get("/signup", authController.restrictedRoutes, viewController.signUp);
 
-Router.get("/verifyOTP/:email", viewController.verifyOTP);
+Router.get(
+  "/verifyOTP/:email",
+  authController.isAuthenticated,
+  authController.restrictedRoutes,
+  viewController.verifyOTP
+);
 
 // Router.use(authController.isAuthenticated);
 

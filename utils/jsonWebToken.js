@@ -112,6 +112,24 @@ class JsonToken {
     }
     next();
   }
+  async loggedInState(req, res, next) {
+    if (req.cookies.jwt) {
+      const verification = await util.promisify(jsonwebtoken.verify)(
+        req.cookies.jwt,
+        this.jwtSecret
+      );
+      if (!verification) return false;
+      const freshUser = await User.findById(verification.id).select(
+        "+otpVerification"
+      );
+      if (!freshUser || !freshUser.otpVerification) return false;
+      if (freshUser.changedPasswordAfter(verification.iat)) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
 
   logout(req, res, next) {
     res.cookie("jwt", "loggedOut", {
