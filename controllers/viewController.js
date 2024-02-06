@@ -51,3 +51,15 @@ exports.verifyOTP = (req, res) => {
     title: "Verification",
   });
 };
+
+exports.forgotPassword = (req, res) => {
+  res.status(200).render("forgotPassword", {
+    title: "Forgot Your Password",
+  });
+};
+
+exports.resetPassword = (req, res) => {
+  res.status(200).render("resetPassword", {
+    title: "Password Reset",
+  });
+};

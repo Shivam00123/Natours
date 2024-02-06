@@ -13,10 +13,22 @@ Router.get("/signin", authController.restrictedRoutes, viewController.signIn);
 Router.get("/signup", authController.restrictedRoutes, viewController.signUp);
 
 Router.get(
+  "/forgot-password",
+  authController.restrictedRoutes,
+  viewController.forgotPassword
+);
+
+Router.get(
   "/verifyOTP/:email",
   authController.isAuthenticated,
   authController.restrictedRoutes,
   viewController.verifyOTP
+);
+
+Router.get(
+  "/resetPassword/:token",
+  authController.restrictedRoutes,
+  viewController.resetPassword
 );
 
 // Router.use(authController.isAuthenticated);

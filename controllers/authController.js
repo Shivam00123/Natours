@@ -72,7 +72,9 @@ exports.logout = (req, res) => {
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   //get user with email;
-  const { email } = req.body;
+  console.log({ email: req.body });
+  const email = req.body.email;
+  console.log({ email });
   if (!email) return next(new ErrorHandler("Please provide an Email!", 400));
 
   const user = await User.findOne({ email });
@@ -83,9 +85,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   const linkToResetPassword = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/users/resetPassword/${resetToken}`;
+  )}/resetPassword/${resetToken}`;
 
   await new Email(user, linkToResetPassword).sendPasswordReset();
+  res.status(200).json({
+    status: "success",
+  });
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
@@ -109,7 +114,9 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   await user.save();
 
-  await new JsonToken(user._id).signToken(user, 200, res);
+  res.status(200).json({
+    status: "success",
+  });
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {

@@ -24,9 +24,10 @@ userRouter
   .post(authController.isAuthenticated, authController.resendOTP);
 
 //Auth Required
-userRouter.use(authController.isAuthenticated);
 
-userRouter.route("/updatePassword").post(authController.updatePassword);
+userRouter
+  .route("/updatePassword")
+  .post(authController.isAuthenticated, authController.updatePassword);
 
 userRouter.patch(
   "/updateMe",
@@ -35,16 +36,25 @@ userRouter.patch(
   userController.updateMe
 );
 
-userRouter.delete("/", userController.deleteMe);
+userRouter.delete("/", authController.isAuthenticated, userController.deleteMe);
 
 userRouter
   .route("/me")
-  .get(userController.aboutMe, userController.getMyDetails);
+  .get(
+    authController.isAuthenticated,
+    userController.aboutMe,
+    userController.getMyDetails
+  );
 
 //Admin restricted Route
-userRouter.use(authController.restrictTo("admin"));
 
-userRouter.route("/").get(userController.getUsers);
+userRouter
+  .route("/")
+  .get(
+    authController.isAuthenticated,
+    authController.restrictTo("admin"),
+    userController.getUsers
+  );
 
 //Basic
 

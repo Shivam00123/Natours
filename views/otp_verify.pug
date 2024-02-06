@@ -16,7 +16,8 @@ html(lang="en")
                     .form__group.ma-bt-md
                         label.form__label(for='text') OTP
                         input#otp.form__input(type='text', placeholder='OTP', required)
-                        a#Resend_OTP.resend__otp(href="#") resend OTP
+                        .space
+                        a#Resend_OTP.link__text(href="#") resend OTP
                     .form__group
                         button#verify.btn.btn--green Verify
         script(src="/js/bundle.js") 

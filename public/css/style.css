@@ -1330,3 +1330,13 @@ body {
 .resend__otp {
   font-size: 14px;
 }
+.link__text {
+  font-size: 14px;
+  color: #28b487;
+  text-decoration: underline;
+  font-style: italic;
+  font-weight: 700;
+}
+.space {
+  height: 10px;
+}
