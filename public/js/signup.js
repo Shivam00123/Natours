@@ -15,7 +15,7 @@ export const registerUser = async (name, email, password, confirmPassword) => {
   });
   console.log(response);
   if (response.status === "success") {
-    location.assign("/verifyOTP");
+    location.assign(`/verifyOTP/${response.data.users.email}`);
   } else {
     Alert("error", response.message);
   }

@@ -4,6 +4,7 @@ const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
 const Email = require("../utils/email");
+const { generateOTP } = require("../utils/generateOTP");
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
@@ -14,9 +15,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
     profile: req.body.profile,
     role: req.body.role,
   });
-  res.status(200).json({
-    status: "success",
-  });
+  await new JsonToken(user._id).signToken(user, 201, res);
 });
 
 exports.loginUser = catchAsync(async (req, res, next) => {
@@ -26,14 +25,19 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email or password!", 400));
   }
 
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email })
+    .select("+password")
+    .select("+otpVerification");
   if (!user) return next(new ErrorHandler("User not found!", 404));
 
   const checkPassword = await user.correctPasswords(password, user.password);
   if (!checkPassword) {
     return next(new ErrorHandler("Invalid email or password", 404));
   }
-
+  if (!user.otpVerification) {
+    await generateOTP(user);
+    return await new JsonToken(user._id).signToken(user, 200, res, false);
+  }
   await new JsonToken(user._id).signToken(user, 200, res);
 });
 
@@ -187,17 +191,32 @@ exports.verifyUserOTP = catchAsync(async (req, res, next) => {
   const user_OTP = String(
     crypto.createHash("sha256").update(OTP).digest("hex")
   );
-  const user = await User.findOne({ oneTimePassword: user_OTP });
+  const user = await User.findOne({
+    oneTimePassword: user_OTP,
+    otpExpiration: { $gt: Date.now() },
+  });
   if (!user)
     return next(
       new ErrorHandler(
-        "Invalid OTP, Please provide a valid OTP sent on your email",
+        "Invalid OTP, Your OTP is either invalid or Expired, Please generate new OTP",
         400
       )
     );
-  console.log({ user });
   user.oneTimePassword = undefined;
   user.otpVerification = true;
   await user.save({ validateBeforeSave: false });
-  await new JsonToken(user._id).signToken(user, 201, res);
+  res.status(200).json({
+    status: "success",
+  });
+});
+
+exports.resendOTP = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  await generateOTP(user);
+  res.status(200).json({
+    status: "success",
+    user,
+  });
 });

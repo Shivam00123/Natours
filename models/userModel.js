@@ -60,6 +60,7 @@ const userSchema = new mongoose.Schema({
     default: false,
     select: false,
   },
+  otpExpiration: { type: Date, select: false },
   passwordChangedAt: Date,
   resetPasswordToken: String,
   resetTokenExpiresIn: Date,
@@ -76,6 +77,7 @@ userSchema.pre("save", async function (next) {
   const OTP = String(Math.floor(100000 + Math.random() * 900000));
   const user = { name: this.name, email: this.email };
   this.oneTimePassword = crypto.createHash("sha256").update(OTP).digest("hex");
+  this.otpExpiration = Date.now() + 5 * 60 * 1000;
   await new Email(user).sendOTP(OTP);
 
   next();

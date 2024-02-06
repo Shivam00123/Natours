@@ -4,6 +4,7 @@ import { displayMap } from "./toursMap";
 import { updateNameOrEmail, changePassword } from "./updateSetting";
 import { registerUser } from "./signup";
 import { verifyOTP } from "./verifyOTP";
+import { resendOTP } from "./resendOTP";
 
 const mapSection = document.getElementById("map");
 const loginForm = document.querySelector("#login_form");
@@ -93,6 +94,17 @@ if (otp_form) {
     verify_btn.textContent = "Verifying...";
     await verifyOTP(candidate_otp.value);
     candidate_otp.value = "";
+    verify_btn.textContent = "Verify";
+  });
+  const resendOTP_btn = document.getElementById("Resend_OTP");
+  resendOTP_btn.addEventListener("click", async (e) => {
+    const verify_btn = document.getElementById("verify");
+    const text = document.getElementById("verify_otp_text");
+    verify_btn.textContent = "sending OTP...";
+    const status = await resendOTP();
+    if (status.status === "success") {
+      text.textContent = "New OTP has sent on your email address";
+    }
     verify_btn.textContent = "Verify";
   });
 }

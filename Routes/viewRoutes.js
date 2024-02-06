@@ -12,7 +12,7 @@ Router.get("/signin", authController.isLoggedIn, viewController.signIn);
 
 Router.get("/signup", viewController.signUp);
 
-Router.get("/verifyOTP", viewController.verifyOTP);
+Router.get("/verifyOTP/:email", viewController.verifyOTP);
 
 // Router.use(authController.isAuthenticated);
 

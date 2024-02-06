@@ -26,7 +26,7 @@ class JsonToken {
     return cookieOptions;
   }
 
-  async signToken(users, statusCode, res) {
+  async signToken(users, statusCode, res, verified = true) {
     this.token = await jsonwebtoken.sign({ id: this.id }, this.jwtSecret, {
       expiresIn: this.expiresIn,
     });
@@ -37,7 +37,7 @@ class JsonToken {
     users.otpVerification = undefined;
 
     res.status(statusCode).json({
-      status: "success",
+      status: verified ? "success" : "pending",
       token: this.token,
       data: {
         users,
@@ -99,9 +99,11 @@ class JsonToken {
         req.cookies.jwt,
         this.jwtSecret
       );
-      if (!verification) next();
-      const freshUser = await User.findById(verification.id);
-      if (!freshUser) next();
+      if (!verification) return next();
+      const freshUser = await User.findById(verification.id).select(
+        "+otpVerification"
+      );
+      if (!freshUser || !freshUser.otpVerification) return next();
       if (freshUser.changedPasswordAfter(verification.iat)) {
         return next();
       }

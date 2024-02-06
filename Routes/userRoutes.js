@@ -19,6 +19,10 @@ userRouter.route("/resetPassword/:token").patch(authController.resetPassword);
 
 userRouter.route("/verify-user-otp").post(authController.verifyUserOTP);
 
+userRouter
+  .route("/resendOTP")
+  .post(authController.isAuthenticated, authController.resendOTP);
+
 //Auth Required
 userRouter.use(authController.isAuthenticated);
 

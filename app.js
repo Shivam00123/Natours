@@ -69,6 +69,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);
 
 app.all("*", (req, res, next) => {
+  if (req.originalUrl === "/bundle.js.map") return next();
   next(new ErrorHandler("Invalid URL!", 404));
 });
 

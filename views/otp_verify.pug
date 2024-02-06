@@ -11,11 +11,12 @@ html(lang="en")
         main.main
             .login-form
                 h2.heading-secondary.ma-bt-lg Verify OTP
-                p.card__text Please enter the OTP sent to your registered email address.
+                p#verify_otp_text.card__text Please enter the OTP sent to your registered email address.
                 form#otp_form.form
                     .form__group.ma-bt-md
                         label.form__label(for='text') OTP
                         input#otp.form__input(type='text', placeholder='OTP', required)
+                        a#Resend_OTP.resend__otp(href="#") resend OTP
                     .form__group
                         button#verify.btn.btn--green Verify
         script(src="/js/bundle.js") 

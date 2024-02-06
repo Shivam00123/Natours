@@ -33,6 +33,7 @@ body {
   font-family: "Lato", sans-serif;
   color: #777;
   padding: 3rem;
+  height: fit-content;
   min-height: 100vh;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1325,4 +1326,7 @@ body {
 }
 .color__green {
   color: #28b487;
+}
+.resend__otp {
+  font-size: 14px;
 }
