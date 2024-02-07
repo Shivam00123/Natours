@@ -65,6 +65,17 @@ exports.aboutMe = (req, res, next) => {
 
 exports.getMyDetails = factory.findById(User);
 
+exports.getMyBookings = catchAsync(async (req, res, next) => {
+  let userWithBookings = await User.findById(req.user._id).populate({
+    path: "myTours",
+    select: ["tour", "price", "-user"],
+  });
+  if (!userWithBookings) return next();
+
+  req.user = userWithBookings;
+  next();
+});
+
 // const multerStorage = multer.diskStorage({ // We use this in order to write the file into disk to use it
 //   destination: (req, file, cb) => {        // but now we are using a resize middleware we dont have to keep it in disk we simply put it in memory in order to read it which is more efficient
 //     cb(null, "public/img/users");

@@ -1,7 +1,7 @@
 extends base 
 
-mixin list(icon,label,active)
-    li(class=`side-nav--${active ? "active" : ""}`)
+mixin list(icon,label,component,active)
+    li(class=`side-nav--`,data-target= `${component}`)
         a(href='#')
             svg
                 use(xlink:href=`img/icons.svg#icon-${icon}`)
@@ -12,11 +12,11 @@ block content
     main.main
         .user-view
             nav.user-view__menu
-                ul.side-nav
-                    +list("settings","Settings",true)
-                    +list("briefcase","My bookings")
-                    +list("star","My reviews")
-                    +list("credit-card","Billing")
+                ul#menu_list.side-nav
+                    +list("settings","Settings","component1",true)
+                    +list("briefcase",`My bookings (${user.myTours.length})`,"component2")
+                    +list("star","My reviews","component3")
+                    +list("credit-card","Billing","component4")
                 - if(user.role === "admin")
                     .admin-nav
                         h5.admin-nav__heading Admin
@@ -26,7 +26,7 @@ block content
                             +list("star","Manage reviews")
                             +list("briefcase","Manage bookings")
 
-            .user-view__content
+            #component1.user-view__content
                 .user-view__form-container
                     h2.heading-secondary.ma-bt-md Your account settings
                     form#userData_form.form.form-user-data
@@ -57,3 +57,16 @@ block content
                             input#password-confirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
                         .form__group.right
                             button#update_password_btn.btn.btn--small.btn--green Save password
+            #component2.user-view__content
+                .user-view__form-container
+                    h2.heading-secondary.ma-bt-md My Bookings
+                    .booking-cards-container
+                        each booking in user.myTours 
+                            a(href=`/tour/${booking.tour.slug}`).booking-card
+                                img(src='/img/tours/tour-1-1.jpg', alt='Product Image')
+                                .card-info
+                                    .wrapper 
+                                        h3.product-name= booking.tour.name
+                                        p.product-price= `$${booking.price}`
+                                
+                            

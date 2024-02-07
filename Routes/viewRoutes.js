@@ -1,6 +1,8 @@
 const express = require("express");
 const viewController = require("../controllers/viewController");
 const authController = require("../controllers/authController");
+const userController = require("../controllers/userController");
+const bookingsController = require("../controllers/bookingsController");
 
 const Router = express.Router();
 
@@ -33,6 +35,19 @@ Router.get(
 
 // Router.use(authController.isAuthenticated);
 
-Router.get("/me", authController.isAuthenticated, viewController.getMe);
+Router.get(
+  "/me",
+  authController.isAuthenticated,
+  userController.getMyBookings,
+  bookingsController.groupMyBookings,
+  viewController.getMe
+);
+
+Router.get(
+  "/booking-successful",
+  authController.createBookingCheckout,
+  authController.isAuthenticated,
+  viewController.bookingSuccessful
+);
 
 module.exports = Router;

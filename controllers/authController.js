@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const User = require("../models/userModel");
+const Booking = require("../models/bookingModel");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
@@ -221,4 +222,14 @@ exports.resendOTP = catchAsync(async (req, res, next) => {
     status: "success",
     user,
   });
+});
+
+exports.createBookingCheckout = catchAsync(async (req, res, next) => {
+  const { tour, price, user } = req.query;
+
+  if (tour && user && price) {
+    await Booking.create({ tour, user, price });
+  }
+
+  next();
 });

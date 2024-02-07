@@ -63,3 +63,9 @@ exports.resetPassword = (req, res) => {
     title: "Password Reset",
   });
 };
+
+exports.bookingSuccessful = (req, res) => {
+  res.status(200).render("bookingSuccessful", {
+    title: "Booking Successful",
+  });
+};

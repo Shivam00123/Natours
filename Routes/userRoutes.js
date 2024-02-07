@@ -31,6 +31,7 @@ userRouter
 
 userRouter.patch(
   "/updateMe",
+  authController.isAuthenticated,
   userController.uploadUserImage,
   userController.reszieUserImage,
   userController.updateMe

@@ -4,66 +4,78 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const Email = require("../utils/email");
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Name cannot be empty!"],
-    minlength: [3, "Name too short."],
-    maxlength: [40, "Name too long."],
-  },
-  email: {
-    type: String,
-    required: [true, "Please provide your email"],
-    unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, "Please provide a valid email"],
-  },
-
-  profile: {
-    type: String,
-  },
-  password: {
-    type: String,
-    required: [true, "A Password cannot be empty!"],
-    minlength: [
-      8,
-      "Password too short, Password must be more than or equal to 8 character long.",
-    ],
-    select: false,
-  },
-  confirmPassword: {
-    type: String,
-    required: [true, "Password does not match"],
-    validate: {
-      validator: function (value) {
-        return this.password === value;
-      },
-      message: "Password does not match",
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Name cannot be empty!"],
+      minlength: [3, "Name too short."],
+      maxlength: [40, "Name too long."],
     },
+    email: {
+      type: String,
+      required: [true, "Please provide your email"],
+      unique: true,
+      lowercase: true,
+      validate: [validator.isEmail, "Please provide a valid email"],
+    },
+
+    profile: {
+      type: String,
+    },
+    password: {
+      type: String,
+      required: [true, "A Password cannot be empty!"],
+      minlength: [
+        8,
+        "Password too short, Password must be more than or equal to 8 character long.",
+      ],
+      select: false,
+    },
+    confirmPassword: {
+      type: String,
+      required: [true, "Password does not match"],
+      validate: {
+        validator: function (value) {
+          return this.password === value;
+        },
+        message: "Password does not match",
+      },
+    },
+    role: {
+      type: String,
+      default: "user",
+    },
+    photo: {
+      type: String,
+      default: "default.jpg",
+    },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
+    oneTimePassword: { type: String, select: false },
+    otpVerification: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
+    otpExpiration: { type: Date, select: false },
+    passwordChangedAt: Date,
+    resetPasswordToken: String,
+    resetTokenExpiresIn: Date,
   },
-  role: {
-    type: String,
-    default: "user",
-  },
-  photo: {
-    type: String,
-    default: "default.jpg",
-  },
-  active: {
-    type: Boolean,
-    default: true,
-    select: false,
-  },
-  oneTimePassword: { type: String, select: false },
-  otpVerification: {
-    type: Boolean,
-    default: false,
-    select: false,
-  },
-  otpExpiration: { type: Date, select: false },
-  passwordChangedAt: Date,
-  resetPasswordToken: String,
-  resetTokenExpiresIn: Date,
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+userSchema.virtual("myTours", {
+  ref: "Booking",
+  foreignField: "user",
+  localField: "_id",
 });
 
 userSchema.pre("save", async function (next) {

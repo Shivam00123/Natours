@@ -8,6 +8,7 @@ import { resendOTP } from "./resendOTP";
 import { forgotPassword } from "./forgotPassword";
 import { Alert } from "./alert";
 import { resetPassword } from "./resetPassword";
+import { bookTour } from "./bookTour";
 
 const mapSection = document.getElementById("map");
 const loginForm = document.querySelector("#login_form");
@@ -18,6 +19,8 @@ const update_password_form = document.querySelector("#update_password_form");
 const otp_form = document.querySelector("#otp_form");
 const forgot_password_form = document.querySelector("#forgot_password_form");
 const reset_password_form = document.querySelector("#reset_password_form");
+const book_tour = document.getElementById("book_tour");
+const menu_list = document.getElementById("menu_list");
 
 // Map-section
 if (mapSection) {
@@ -153,5 +156,37 @@ if (reset_password_form) {
     reset_btn.textContent = "Please wait...";
     await resetPassword(password.value, confirmPassword.value);
     reset_btn.textContent = "Reset";
+  });
+}
+
+if (book_tour) {
+  book_tour.addEventListener("click", async (e) => {
+    e.target.textContent = "Processing...";
+    const tourId = e.target.dataset.tourId;
+    await bookTour(tourId);
+    e.target.textContent = "Book Tour Now!";
+  });
+}
+if (menu_list) {
+  document.getElementById("component1").style.display = "block";
+  document.querySelectorAll(".side-nav--")[0].classList.add("side-nav--active");
+  menu_list.addEventListener("click", function (e) {
+    let listItem = e.target.closest("li");
+    let comp = listItem.getAttribute("data-target");
+    if (listItem.classList.contains("side-nav--")) {
+      // Remove "active" class from all menu items
+      let menuItems = document.querySelectorAll(".side-nav--active");
+      menuItems.forEach(function (item) {
+        item.classList.remove("side-nav--active");
+      });
+
+      // Add "active" class to the clicked menu item
+      listItem.classList.add("side-nav--active");
+    }
+    const components = document.querySelectorAll(".user-view__content");
+    components.forEach(function (component) {
+      component.style.display = "none";
+    });
+    document.getElementById(comp).style.display = "block";
   });
 }
