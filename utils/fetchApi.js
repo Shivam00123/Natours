@@ -8,6 +8,16 @@ export const get_fetchAPI = async (endpoint) => {
   return response;
 };
 
+export const delete_fetchAPI = async (endpoint) => {
+  const response = await fetch(`http://localhost:3001/api/v1/${endpoint}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((res) => res.json());
+  return response;
+};
+
 export const patch_fetchAPI = async (endpoint, body) => {
   const response = await fetch(`http://localhost:3001/api/v1/${endpoint}`, {
     method: "PATCH",

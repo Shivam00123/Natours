@@ -39,7 +39,6 @@ Router.get(
   "/me",
   authController.isAuthenticated,
   bookingsController.getMyBookings,
-  bookingsController.groupMyBookings,
   viewController.getMe
 );
 

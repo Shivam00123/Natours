@@ -9,6 +9,7 @@ import { forgotPassword } from "./forgotPassword";
 import { Alert } from "./alert";
 import { resetPassword } from "./resetPassword";
 import { bookTour } from "./bookTour";
+import { cancelBooking } from "./cancelBooking";
 
 const mapSection = document.getElementById("map");
 const loginForm = document.querySelector("#login_form");
@@ -21,6 +22,8 @@ const forgot_password_form = document.querySelector("#forgot_password_form");
 const reset_password_form = document.querySelector("#reset_password_form");
 const book_tour = document.getElementById("book_tour");
 const menu_list = document.getElementById("menu_list");
+const search_tour = document.getElementById("search_tour");
+const cancel_booking = document.getElementById("cancel_booking");
 
 // Map-section
 if (mapSection) {
@@ -123,12 +126,14 @@ if (otp_form) {
 
   const resendOTP_btn = document.getElementById("Resend_OTP");
   resendOTP_btn.addEventListener("click", async (e) => {
+    e.preventDefault();
     const verify_btn = document.getElementById("verify");
     const text = document.getElementById("verify_otp_text");
     verify_btn.textContent = "sending OTP...";
     const status = await resendOTP();
     if (status.status === "success") {
       text.textContent = "New OTP has sent on your email address";
+      Alert("success", "New OTP has been sent on your email, Please check!");
     }
     verify_btn.textContent = "Verify";
   });
@@ -161,16 +166,28 @@ if (reset_password_form) {
 
 if (book_tour) {
   book_tour.addEventListener("click", async (e) => {
+    e.preventDefault();
     e.target.textContent = "Processing...";
     const tourId = e.target.dataset.tourId;
     await bookTour(tourId);
     e.target.textContent = "Book Tour Now!";
   });
 }
+
+if (cancel_booking) {
+  cancel_booking.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.target.textContent = "Wait...";
+    const tourId = e.target.dataset.tourId;
+    await cancelBooking(tourId);
+  });
+}
+
 if (menu_list) {
   document.getElementById("component1").style.display = "block";
   document.querySelectorAll(".side-nav--")[0].classList.add("side-nav--active");
   menu_list.addEventListener("click", function (e) {
+    e.preventDefault();
     let listItem = e.target.closest("li");
     let comp = listItem.getAttribute("data-target");
     if (listItem.classList.contains("side-nav--")) {

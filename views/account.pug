@@ -58,15 +58,16 @@ block content
                         .form__group.right
                             button#update_password_btn.btn.btn--small.btn--green Save password
             #component2.user-view__content
-                .user-view__form-container
+                .bookings__form-container
                     h2.heading-secondary.ma-bt-md My Bookings
                     .booking-cards-container
                         each booking in bookedTours 
                             a(href=`/tour/${booking.slug}`).booking-card
-                                img(src='/img/tours/tour-1-1.jpg', alt='Product Image')
+                                img(src=`/img/tours/${booking.imageCover}`, alt=`${booking.name}`)
                                 .card-info
                                     .wrapper 
                                         h3.product-name= booking.name
                                         p.product-price= `$${booking.price}`
+                                    button#cancel_booking.cancel-btn.btn--red.cancel-btn(data-tour-id= booking._id) Cancel
                                 
                             

@@ -5,7 +5,7 @@ const ErrorHandler = require("../utils/errorHandler");
 
 exports.renderOverview = catchAsync(async (req, res, next) => {
   const tours = await Tour.find();
-  const bookings = req.bookings;
+  const bookings = req.bookings || [];
   const bookedTourIds = bookings.map((el) => el.tour._id.toString());
   res.status(200).render("overview", {
     title: "All Tours",
@@ -21,7 +21,7 @@ exports.renderTour = catchAsync(async (req, res, next) => {
     path: "reviews",
     select: "review user rating",
   });
-  const bookings = req.bookings;
+  const bookings = req.bookings || [];
   const bookedTourIds = bookings.map((el) => el.tour._id.toString());
   if (!tour || !tour.length)
     return next(new ErrorHandler("Document not found!", 404));

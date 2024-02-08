@@ -30,7 +30,7 @@ bookingSchema.index({ user: 1, tour: 1 }, { unique: true });
 bookingSchema.pre(/^find/, function (next) {
   this.populate({
     path: "tour",
-    select: ["name", "slug"],
+    select: ["name", "slug", "imageCover"],
   });
   next();
 });

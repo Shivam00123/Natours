@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config.env" });
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const factory = require("./handlerFactory");
 
 const Tour = require("../models/tourModel");
 const catchAsync = require("../utils/catchAsync");
@@ -69,14 +70,4 @@ exports.getMyBookings = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.groupMyBookings = catchAsync(async (req, res, next) => {
-  // const groupBookings = await Booking.aggregate([
-  //   {
-  //     $group: {
-  //       _id: `${tour.name}`,
-  //     },
-  //   },
-  // ]);
-  // console.log(groupBookings);
-  next();
-});
+exports.cancelBooking = factory.deleteOne(Booking);
