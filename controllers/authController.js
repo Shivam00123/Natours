@@ -6,6 +6,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
 const Email = require("../utils/email");
 const { generateOTP } = require("../utils/generateOTP");
+const Tour = require("../models/tourModel");
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
@@ -229,6 +230,8 @@ exports.createBookingCheckout = catchAsync(async (req, res, next) => {
 
   if (tour && user && price) {
     await Booking.create({ tour, user, price });
+    // const tour = await Tour.findById(tour);
+    // tour.bookings
   }
 
   next();

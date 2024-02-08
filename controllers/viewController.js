@@ -5,9 +5,12 @@ const ErrorHandler = require("../utils/errorHandler");
 
 exports.renderOverview = catchAsync(async (req, res, next) => {
   const tours = await Tour.find();
+  const bookings = req.bookings;
+  const bookedTourIds = bookings.map((el) => el.tour._id.toString());
   res.status(200).render("overview", {
     title: "All Tours",
     tours,
+    bookedTourIds,
   });
 });
 
@@ -18,11 +21,14 @@ exports.renderTour = catchAsync(async (req, res, next) => {
     path: "reviews",
     select: "review user rating",
   });
+  const bookings = req.bookings;
+  const bookedTourIds = bookings.map((el) => el.tour._id.toString());
   if (!tour || !tour.length)
     return next(new ErrorHandler("Document not found!", 404));
   res.status(200).render("tour", {
     title: `${tour[0].name} Tour`,
     tour: tour[0],
+    bookedTourIds,
   });
 });
 
@@ -34,9 +40,11 @@ exports.signIn = (req, res) => {
 
 exports.getMe = (req, res) => {
   const user = req.user;
+  const bookedTours = req.booking;
   res.status(200).render("account", {
     title: "Your account setting",
     user,
+    bookedTours,
   });
 };
 

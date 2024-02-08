@@ -60,6 +60,15 @@ exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getMyBookings = catchAsync(async (req, res, next) => {
+  const user = req.user._id;
+  const Bookings = await Booking.find({ user: user });
+  const tourIds = Bookings.map((booking) => booking.tour);
+  const Tours = await Tour.find({ _id: { $in: tourIds } });
+  req.booking = Tours;
+  next();
+});
+
 exports.groupMyBookings = catchAsync(async (req, res, next) => {
   // const groupBookings = await Booking.aggregate([
   //   {

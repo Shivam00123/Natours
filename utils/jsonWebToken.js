@@ -100,13 +100,17 @@ class JsonToken {
         this.jwtSecret
       );
       if (!verification) return next();
-      const freshUser = await User.findById(verification.id).select(
-        "+otpVerification"
-      );
+      const freshUser = await User.findById(verification.id)
+        .select("+otpVerification")
+        .populate({
+          path: "myTours",
+          select: ["tour", "price", "-user"],
+        });
       if (!freshUser || !freshUser.otpVerification) return next();
       if (freshUser.changedPasswordAfter(verification.iat)) {
         return next();
       }
+      req.bookings = freshUser.myTours;
       req.user = freshUser;
       res.locals.user = freshUser;
     }

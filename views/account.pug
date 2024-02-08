@@ -14,7 +14,7 @@ block content
             nav.user-view__menu
                 ul#menu_list.side-nav
                     +list("settings","Settings","component1",true)
-                    +list("briefcase",`My bookings (${user.myTours.length})`,"component2")
+                    +list("briefcase",`My bookings (${bookedTours.length})`,"component2")
                     +list("star","My reviews","component3")
                     +list("credit-card","Billing","component4")
                 - if(user.role === "admin")
@@ -61,12 +61,12 @@ block content
                 .user-view__form-container
                     h2.heading-secondary.ma-bt-md My Bookings
                     .booking-cards-container
-                        each booking in user.myTours 
-                            a(href=`/tour/${booking.tour.slug}`).booking-card
+                        each booking in bookedTours 
+                            a(href=`/tour/${booking.slug}`).booking-card
                                 img(src='/img/tours/tour-1-1.jpg', alt='Product Image')
                                 .card-info
                                     .wrapper 
-                                        h3.product-name= booking.tour.name
+                                        h3.product-name= booking.name
                                         p.product-price= `$${booking.price}`
                                 
                             

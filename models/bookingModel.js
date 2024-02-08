@@ -25,6 +25,8 @@ const bookingSchema = new mongoose.Schema({
   },
 });
 
+bookingSchema.index({ user: 1, tour: 1 }, { unique: true });
+
 bookingSchema.pre(/^find/, function (next) {
   this.populate({
     path: "tour",
