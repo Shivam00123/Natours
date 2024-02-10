@@ -27,6 +27,7 @@ const search_tour = document.getElementById("search_tour");
 const cancel_booking = document.getElementById("cancel_booking");
 const add_review = document.getElementById("add_review");
 const review_form = document.querySelector("#review_form");
+const date_picker_form = document.querySelector("#date_picker_form");
 
 // Map-section
 if (mapSection) {
@@ -167,16 +168,6 @@ if (reset_password_form) {
   });
 }
 
-if (book_tour) {
-  book_tour.addEventListener("click", async (e) => {
-    e.preventDefault();
-    e.target.textContent = "Processing...";
-    const tourId = e.target.dataset.tourId;
-    await bookTour(tourId);
-    e.target.textContent = "Book Tour Now!";
-  });
-}
-
 if (cancel_booking) {
   cancel_booking.addEventListener("click", async (e) => {
     e.preventDefault();
@@ -242,4 +233,24 @@ if (review_form) {
       const review = document.getElementById("review");
       await sendReview(review.value, starCount);
     });
+}
+if (date_picker_form) {
+  date_picker_form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const startDate_value = document.getElementById("startDate_value");
+    const submit_startDate = document.getElementById("submit_startDate");
+    const tourId = startDate_value.dataset.id;
+    submit_startDate.textContent = "Processing...";
+    await bookTour(tourId, startDate_value.value);
+    submit_startDate.textContent = "Submit";
+  });
+}
+
+if (book_tour) {
+  book_tour.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const tourId = e.target.dataset.tourId;
+    if (!tourId) return Alert("error", "Cannot book your tour right now");
+    location.assign(`/selectStartDate/${tourId}`);
+  });
 }

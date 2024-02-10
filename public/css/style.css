@@ -1517,3 +1517,26 @@ body {
 .border-white {
   border: 2px solid white;
 }
+
+label {
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+select {
+  padding: 8px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}

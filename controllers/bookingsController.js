@@ -10,7 +10,7 @@ const Booking = require("../models/bookingModel");
 
 exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId);
-
+  const startDate = req.params.startdate;
   const customer = await stripe.customers.create({
     name: req.user.name,
     email: req.user.email,
@@ -30,7 +30,7 @@ exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
       "host"
     )}/booking-successful?tour=${tour._id}&user=${req.user._id}&price=${
       tour.price
-    }`,
+    }&startdate=${startDate}`,
     cancel_url: `${req.protocol}://${req.get("host")}/tour/${tour.slug}`,
     client_reference_id: req.params.tourId,
     line_items: [
@@ -65,7 +65,7 @@ exports.getMyBookings = catchAsync(async (req, res, next) => {
   const user = req.user._id;
   const Bookings = await Booking.find({ user: user }).populate({
     path: "tour",
-    select: "name,price,imageCover,slug",
+    select: ["name", "price", "imageCover", "slug", "startDates"],
   });
   req.booking = Bookings;
   next();

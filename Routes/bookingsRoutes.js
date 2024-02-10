@@ -8,7 +8,7 @@ const Router = express.Router();
 Router.use(authController.isAuthenticated);
 
 Router.get(
-  "/checkout-session/:tourId",
+  "/checkout-session/:tourId/:startdate",
   bookingsController.requestCheckoutSession
 );
 

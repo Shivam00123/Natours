@@ -225,51 +225,42 @@ exports.resendOTP = catchAsync(async (req, res, next) => {
 });
 
 exports.createBookingCheckout = catchAsync(async (req, res, next) => {
-  const { tour, price, user } = req.query;
-  const newDate = "2024-05-09T13:52:41.104+00:00";
+  const { tour, price, user, startdate } = req.query;
 
   if (tour && user && price) {
-    // await Booking.create({ tour, user, price });
-    const document = await Tour.findOneAndUpdate(
-      {
-        "Dates.date": newDate,
-      },
-      {
-        $inc: { "Dates.$.participants": 1 },
-      },
-      {
-        $set: {
-          "Dates.$[elem].soldOut": {
-            $cond: {
-              if: { $gte: ["$Dates.$[elem].participants", "$maxGroupSize"] },
-              then: true,
-              else: false,
-            },
-          },
-        },
-      },
-      {
-        new: true,
-        arrayFilters: [{ "elem.date": newDate }],
-      }
-    );
-    if (document && document?.Dates) {
-      document.Dates.forEach((dateEl) => {
-        if (dateEl.participants >= document.maxGroupSize - 1) {
-          dateEl.soldOut = true;
+    const document = await Tour.findById(tour);
+    if (document?.Dates?.length) {
+      let dateMatch = false;
+      document.Dates.forEach((doc) => {
+        if (new Date(doc.date).getTime() === new Date(startdate).getTime()) {
+          dateMatch = true;
+          if (doc.participants < document.maxGroupSize) {
+            doc.participants++;
+          } else {
+            return next(new ErrorHandler("Booking is already full", 400));
+          }
+          if (doc.participants === document.maxGroupSize) {
+            doc.soldOut = true;
+          }
         }
       });
-      await document.save();
+      if (!dateMatch) {
+        document.Dates.push({
+          date: startdate,
+          participants: 1,
+          soldOut: false,
+        });
+      }
+    } else {
+      document.Dates = [];
+      document.Dates.push({
+        date: startdate,
+        participants: 1,
+        soldOut: false,
+      });
     }
-    if (!document) {
-      await Tour.findByIdAndUpdate(
-        tour,
-        {
-          $push: { Dates: { date: newDate, participants: 1, soldOut: false } },
-        },
-        { new: true }
-      );
-    }
+    await Booking.create({ tour, user, price });
+    await document.save();
   }
 
   next();

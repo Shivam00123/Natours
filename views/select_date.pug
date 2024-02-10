@@ -1,0 +1,19 @@
+extends base
+
+block content 
+    main.main
+        .login-form
+            h2.heading-secondary.ma-bt-lg Pick a date to start your Tour
+            form#date_picker_form.form
+                .form__group
+                    label.form__label(for='dropdown') Select a Date
+                    select.form__input(id='startDate_value', name='selectedDate',data-id= ID)
+                        each startDate in startDates
+                            - const formatedDate = new Date(startDate).toLocaleDateString('en-US', {day: 'numeric',month: 'long',year: 'numeric',})
+                            - if(availableDates.includes(startDate))
+                                option(value=startDate)= formatedDate
+                            - else
+                                option(value=startDate, disabled)= `${formatedDate} (Booking Full)`
+                .form__group
+                    button#submit_startDate.btn.btn--green Submit
+

@@ -57,4 +57,12 @@ Router.get(
   viewController.addReview
 );
 
+Router.get(
+  "/selectStartDate/:id",
+  authController.isLoggedIn,
+  authController.isAuthenticated,
+  bookingsController.getMyBookings,
+  viewController.selectStartDate
+);
+
 module.exports = Router;

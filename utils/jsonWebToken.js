@@ -71,7 +71,6 @@ class JsonToken {
 
     //check if user still exists
     const freshUser = await User.findById(verification.id);
-
     if (!freshUser)
       return next(
         new ErrorHandler("User belonging to this token does not exist.", 401)

@@ -22,6 +22,21 @@ exports.renderTour = catchAsync(async (req, res, next) => {
     path: "reviews",
     select: "review user rating",
   });
+  let isBookingAvailable = false;
+  if (
+    tour?.[0]?.Dates &&
+    tour?.[0]?.Dates.length === tour?.[0]?.startDates.length
+  ) {
+    for (let date of tour[0].Dates) {
+      if (!date.soldOut) {
+        isBookingAvailable = true;
+        break;
+      }
+    }
+  } else {
+    isBookingAvailable = true;
+  }
+
   const bookings = req.bookings || [];
   const bookedTourIds = bookings.map((el) => el.tour._id.toString());
   if (!tour || !tour.length)
@@ -31,6 +46,7 @@ exports.renderTour = catchAsync(async (req, res, next) => {
     tour: tour[0],
     user,
     bookedTourIds,
+    isBookingAvailable,
   });
 });
 
@@ -83,5 +99,37 @@ exports.bookingSuccessful = (req, res) => {
 exports.addReview = (req, res) => {
   res.status(200).render("add_review", {
     title: "Add Review",
+  });
+};
+
+exports.selectStartDate = async (req, res, next) => {
+  const tourId = req.params.id;
+  if (!tourId) return next(new ErrorHandler("No Tour Found", 404));
+  const tour = await Tour.findById(tourId);
+  let findAvailableDates = []; // 2021-06-19T09:00:00.000+00:00
+  for (let startDate of tour.startDates) {
+    // 2021-07-20T09:00:00.000+00:00
+    if (tour.Dates?.length) {
+      let found = false;
+      for (let date of tour.Dates) {
+        if (new Date(date.date).getTime() === new Date(startDate).getTime()) {
+          found = true;
+          if (!date.soldOut) {
+            findAvailableDates.push(startDate);
+          }
+        }
+      }
+      if (!found) {
+        findAvailableDates.push(startDate);
+      }
+    } else {
+      findAvailableDates = [...tour.startDates];
+    }
+  }
+  res.status(200).render("select_date", {
+    title: "Select Start Date",
+    startDates: tour.startDates,
+    ID: tour._id,
+    availableDates: findAvailableDates,
   });
 };
