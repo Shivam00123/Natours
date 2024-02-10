@@ -22,7 +22,7 @@ export const loginUser = async (email, password) => {
 export const logout = async () => {
   const response = await get_fetchAPI("users/signout");
   if (response.status === "success") {
-    location.assign("/"); // true -> reload from server not only form browser
+    location.assign("/signin"); // true -> reload from server not only form browser
   } else {
     Alert("error", "Something went wrong");
   }

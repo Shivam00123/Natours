@@ -74,7 +74,6 @@ exports.logout = (req, res) => {
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   //get user with email;
-  console.log({ email: req.body });
   const email = req.body.email;
   console.log({ email });
   if (!email) return next(new ErrorHandler("Please provide an Email!", 400));
@@ -158,7 +157,7 @@ exports.restrictTo = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return next(
         new ErrorHandler(
-          "You do not have permission to perform this action",
+          "Admin and Lead-Guides does not have permission to perform this action",
           403
         )
       );
@@ -227,12 +226,53 @@ exports.resendOTP = catchAsync(async (req, res, next) => {
 
 exports.createBookingCheckout = catchAsync(async (req, res, next) => {
   const { tour, price, user } = req.query;
+  const newDate = "2024-05-09T13:52:41.104+00:00";
 
   if (tour && user && price) {
-    await Booking.create({ tour, user, price });
-    // const tour = await Tour.findById(tour);
-    // tour.bookings
+    // await Booking.create({ tour, user, price });
+    const document = await Tour.findOneAndUpdate(
+      {
+        "Dates.date": newDate,
+      },
+      {
+        $inc: { "Dates.$.participants": 1 },
+      },
+      {
+        $set: {
+          "Dates.$[elem].soldOut": {
+            $cond: {
+              if: { $gte: ["$Dates.$[elem].participants", "$maxGroupSize"] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        new: true,
+        arrayFilters: [{ "elem.date": newDate }],
+      }
+    );
+    if (document && document?.Dates) {
+      document.Dates.forEach((dateEl) => {
+        if (dateEl.participants >= document.maxGroupSize - 1) {
+          dateEl.soldOut = true;
+        }
+      });
+      await document.save();
+    }
+    if (!document) {
+      await Tour.findByIdAndUpdate(
+        tour,
+        {
+          $push: { Dates: { date: newDate, participants: 1, soldOut: false } },
+        },
+        { new: true }
+      );
+    }
   }
 
   next();
 });
+
+// http://localhost:3001/booking-successful?tour=5c88fa8cf4afda39709c295a&user=5c8a21f22f8fb814b56fa18a&price=997

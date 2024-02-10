@@ -44,9 +44,17 @@ Router.get(
 
 Router.get(
   "/booking-successful",
+  authController.isLoggedIn,
   authController.createBookingCheckout,
   authController.isAuthenticated,
   viewController.bookingSuccessful
+);
+
+Router.get(
+  "/review",
+  authController.isLoggedIn,
+  authController.isAuthenticated,
+  viewController.addReview
 );
 
 module.exports = Router;

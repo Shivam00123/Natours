@@ -693,6 +693,15 @@ body {
   display: -ms-flexbox;
   display: flex;
 }
+.give__reviews__rating {
+  width: 200px;
+  height: 30px;
+  margin-top: auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
 .reviews__star {
   height: 2rem;
   width: 2rem;
@@ -818,6 +827,7 @@ body {
   flex: 1;
   padding: 7rem 0;
   display: none;
+  overflow-y: scroll;
 }
 .user-view__form-container {
   max-width: 68rem;
@@ -1486,6 +1496,7 @@ body {
   margin: 0;
   font-size: 18px;
   color: #333;
+  white-space: nowrap;
 }
 
 .product-price {
@@ -1495,5 +1506,14 @@ body {
 }
 
 .cancel-btn {
-  transform: translate(12px, 30px);
+  transform: translate(-2px, 30px);
+}
+.review-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.border-white {
+  border: 2px solid white;
 }

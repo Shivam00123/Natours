@@ -126,6 +126,7 @@ class JsonToken {
       const freshUser = await User.findById(verification.id).select(
         "+otpVerification"
       );
+
       if (!freshUser || !freshUser.otpVerification) return false;
       if (freshUser.changedPasswordAfter(verification.iat)) {
         return false;

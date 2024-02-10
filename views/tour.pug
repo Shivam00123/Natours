@@ -82,6 +82,13 @@ block content
         .reviews
             each review in tour.reviews
                 +reviewCard(review.user.name,review.user.photo,review.review,review.rating)
+        - if (bookedTourIds.includes(String(tour._id)))
+            .review-wrapper 
+                button#add_review.btn.btn--green.border-white(data-tour-id= tour._id) Add review
+        - else 
+            .review-wrapper 
+                button#book_tour.btn.btn--green.border-white(data-tour-id= tour._id) Book Tour 
+                
 
     section.section-cta
         .cta

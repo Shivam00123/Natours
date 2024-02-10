@@ -10,6 +10,7 @@ import { Alert } from "./alert";
 import { resetPassword } from "./resetPassword";
 import { bookTour } from "./bookTour";
 import { cancelBooking } from "./cancelBooking";
+import { sendReview } from "./sendReview";
 
 const mapSection = document.getElementById("map");
 const loginForm = document.querySelector("#login_form");
@@ -24,6 +25,8 @@ const book_tour = document.getElementById("book_tour");
 const menu_list = document.getElementById("menu_list");
 const search_tour = document.getElementById("search_tour");
 const cancel_booking = document.getElementById("cancel_booking");
+const add_review = document.getElementById("add_review");
+const review_form = document.querySelector("#review_form");
 
 // Map-section
 if (mapSection) {
@@ -178,8 +181,9 @@ if (cancel_booking) {
   cancel_booking.addEventListener("click", async (e) => {
     e.preventDefault();
     e.target.textContent = "Wait...";
-    const tourId = e.target.dataset.tourId;
-    await cancelBooking(tourId);
+    const bookingId = e.target.dataset.tourId;
+    await cancelBooking(bookingId);
+    location.assign("/");
   });
 }
 
@@ -206,4 +210,36 @@ if (menu_list) {
     });
     document.getElementById(comp).style.display = "block";
   });
+}
+
+if (add_review) {
+  add_review.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const tourId = e.target.dataset.tourId;
+    location.assign(`/review?tourId=${tourId}`);
+    // location.assign("/tours/:tourId/reviews");
+  });
+}
+
+if (review_form) {
+  let starCount = 5;
+  const review_star = document.getElementById("review_star");
+  review_star.addEventListener("click", (e) => {
+    e.preventDefault();
+    starCount = e.target.dataset.index * 1;
+
+    const stars = document.querySelectorAll("#review_star_star");
+    stars.forEach((star) => star.classList.add("reviews__star--inactive"));
+    for (let i = 0; i < starCount; i++) {
+      stars[i].classList.remove("reviews__star--inactive");
+      stars[i].classList.add("reviews__star--active");
+    }
+  });
+  document
+    .getElementById("post_review")
+    .addEventListener("click", async (e) => {
+      e.preventDefault();
+      const review = document.getElementById("review");
+      await sendReview(review.value, starCount);
+    });
 }

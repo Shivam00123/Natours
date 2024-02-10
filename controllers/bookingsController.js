@@ -63,10 +63,11 @@ exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
 
 exports.getMyBookings = catchAsync(async (req, res, next) => {
   const user = req.user._id;
-  const Bookings = await Booking.find({ user: user });
-  const tourIds = Bookings.map((booking) => booking.tour);
-  const Tours = await Tour.find({ _id: { $in: tourIds } });
-  req.booking = Tours;
+  const Bookings = await Booking.find({ user: user }).populate({
+    path: "tour",
+    select: "name,price,imageCover,slug",
+  });
+  req.booking = Bookings;
   next();
 });
 

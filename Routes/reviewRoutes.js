@@ -9,7 +9,7 @@ Router.use(authController.isAuthenticated);
 //every router has access of only there params so i case we are coming from tourRouter it will loose acccess to the tourId so in that case we use this mergeParams to get access of other params in other routes
 
 Router.route("/")
-  .get(authController.isAuthenticated, reviewController.getAllReviews)
+  .get(reviewController.getAllReviews)
   .post(
     authController.restrictTo("user"),
     reviewController.setTourAndUserIds,

@@ -79,6 +79,22 @@ const tours = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    Dates: [
+      {
+        date: {
+          type: Date,
+          unique: true,
+        },
+        participants: {
+          type: Number,
+          default: 0,
+        },
+        soldOut: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
     slug: {
       type: String,
     },

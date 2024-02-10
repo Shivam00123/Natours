@@ -15,6 +15,7 @@ exports.renderOverview = catchAsync(async (req, res, next) => {
 });
 
 exports.renderTour = catchAsync(async (req, res, next) => {
+  const user = req.user;
   const tour = await Tour.find({
     slug: req.params.slug.toLowerCase(),
   }).populate({
@@ -28,6 +29,7 @@ exports.renderTour = catchAsync(async (req, res, next) => {
   res.status(200).render("tour", {
     title: `${tour[0].name} Tour`,
     tour: tour[0],
+    user,
     bookedTourIds,
   });
 });
@@ -40,11 +42,11 @@ exports.signIn = (req, res) => {
 
 exports.getMe = (req, res) => {
   const user = req.user;
-  const bookedTours = req.booking;
+  const bookings = req.booking;
   res.status(200).render("account", {
     title: "Your account setting",
     user,
-    bookedTours,
+    bookings,
   });
 };
 
@@ -75,5 +77,11 @@ exports.resetPassword = (req, res) => {
 exports.bookingSuccessful = (req, res) => {
   res.status(200).render("bookingSuccessful", {
     title: "Booking Successful",
+  });
+};
+
+exports.addReview = (req, res) => {
+  res.status(200).render("add_review", {
+    title: "Add Review",
   });
 };
