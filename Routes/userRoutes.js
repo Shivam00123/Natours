@@ -17,28 +17,45 @@ userRouter.route("/forgotPassword").post(authController.forgotPassword);
 
 userRouter.route("/resetPassword/:token").patch(authController.resetPassword);
 
-//Auth Required
-userRouter.use(authController.isAuthenticated);
+userRouter.route("/verify-user-otp").post(authController.verifyUserOTP);
 
-userRouter.route("/updatePassword").post(authController.updatePassword);
+userRouter
+  .route("/resendOTP")
+  .post(authController.isAuthenticated, authController.resendOTP);
+
+//Auth Required
+
+userRouter
+  .route("/updatePassword")
+  .post(authController.isAuthenticated, authController.updatePassword);
 
 userRouter.patch(
   "/updateMe",
+  authController.isAuthenticated,
   userController.uploadUserImage,
   userController.reszieUserImage,
   userController.updateMe
 );
 
-userRouter.delete("/", userController.deleteMe);
+userRouter.delete("/", authController.isAuthenticated, userController.deleteMe);
 
 userRouter
   .route("/me")
-  .get(userController.aboutMe, userController.getMyDetails);
+  .get(
+    authController.isAuthenticated,
+    userController.aboutMe,
+    userController.getMyDetails
+  );
 
 //Admin restricted Route
-userRouter.use(authController.restrictTo("admin"));
 
-userRouter.route("/").get(userController.getUsers);
+userRouter
+  .route("/")
+  .get(
+    authController.isAuthenticated,
+    authController.restrictTo("admin"),
+    userController.getUsers
+  );
 
 //Basic
 

@@ -1,9 +1,12 @@
 const crypto = require("crypto");
 const User = require("../models/userModel");
+const Booking = require("../models/bookingModel");
 const catchAsync = require("../utils/catchAsync");
 const ErrorHandler = require("../utils/errorHandler");
 const JsonToken = require("../utils/jsonWebToken");
 const Email = require("../utils/email");
+const { generateOTP } = require("../utils/generateOTP");
+const Tour = require("../models/tourModel");
 
 exports.createUser = catchAsync(async (req, res, next) => {
   const user = await User.create({
@@ -14,10 +17,6 @@ exports.createUser = catchAsync(async (req, res, next) => {
     profile: req.body.profile,
     role: req.body.role,
   });
-  await new Email(
-    user,
-    `${req.protocol}://${req.get("host")}/me`
-  ).sendWelcome();
   await new JsonToken(user._id).signToken(user, 201, res);
 });
 
@@ -28,14 +27,19 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email or password!", 400));
   }
 
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email })
+    .select("+password")
+    .select("+otpVerification");
   if (!user) return next(new ErrorHandler("User not found!", 404));
 
   const checkPassword = await user.correctPasswords(password, user.password);
   if (!checkPassword) {
     return next(new ErrorHandler("Invalid email or password", 404));
   }
-
+  if (!user.otpVerification) {
+    await generateOTP(user);
+    return await new JsonToken(user._id).signToken(user, 200, res, false);
+  }
   await new JsonToken(user._id).signToken(user, 200, res);
 });
 
@@ -51,13 +55,26 @@ exports.isLoggedIn = async (req, res, next) => {
   }
 };
 
+exports.restrictedRoutes = async (req, res, next) => {
+  try {
+    const state = await new JsonToken().loggedInState(req, res, next);
+    if (state) {
+      res.status(301).redirect("/");
+    } else {
+      next();
+    }
+  } catch (error) {
+    next();
+  }
+};
+
 exports.logout = (req, res) => {
   new JsonToken().logout(req, res);
 };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   //get user with email;
-  const { email } = req.body;
+  const email = req.body.email;
   if (!email) return next(new ErrorHandler("Please provide an Email!", 400));
 
   const user = await User.findOne({ email });
@@ -68,27 +85,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   const linkToResetPassword = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/users/resetPassword/${resetToken}`;
+  )}/resetPassword/${resetToken}`;
 
-  const subject = "Your Password reset Token is valid for 10min";
-  const message = `Forgot your password? Submit a patch request with your new password and confirmPassword to ${linkToResetPassword}.\nif you didn't forget your password, Please ignore this email.`;
-
-  // try {
-  //   await sendEmail({
-  //     email: user.email,
-  //     subject,
-  //     message,
-  //   });
-  //   res.status(200).json({
-  //     status: "success",
-  //     message: "Token sent to mail.",
-  //   });
-  // } catch (error) {
-  //   this.resetPasswordToken = undefined;
-  //   this.resetTokenExpiresIn = undefined;
-  //   user.save({ validateBeforeSave: false });
-  //   return next(new ErrorHandler("Something went wrong, Try again later", 500));
-  // }
+  await new Email(user, linkToResetPassword).sendPasswordReset();
+  res.status(200).json({
+    status: "success",
+  });
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
@@ -112,7 +114,9 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   await user.save();
 
-  await new JsonToken(user._id).signToken(user, 200, res);
+  res.status(200).json({
+    status: "success",
+  });
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -152,7 +156,7 @@ exports.restrictTo = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return next(
         new ErrorHandler(
-          "You do not have permission to perform this action",
+          "Admin and Lead-Guides does not have permission to perform this action",
           403
         )
       );
@@ -183,3 +187,82 @@ exports.userAllowedOnlyWith = (...permitted) => {
     });
   };
 };
+
+exports.verifyUserOTP = catchAsync(async (req, res, next) => {
+  const { OTP } = req.body;
+  const user_OTP = String(
+    crypto.createHash("sha256").update(OTP).digest("hex")
+  );
+  const user = await User.findOne({
+    oneTimePassword: user_OTP,
+    otpExpiration: { $gt: Date.now() },
+  });
+  if (!user)
+    return next(
+      new ErrorHandler(
+        "Invalid OTP, Your OTP is either invalid or Expired, Please generate new OTP",
+        400
+      )
+    );
+  user.oneTimePassword = undefined;
+  user.otpVerification = true;
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({
+    status: "success",
+  });
+});
+
+exports.resendOTP = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  await generateOTP(user);
+  res.status(200).json({
+    status: "success",
+    user,
+  });
+});
+
+exports.createBookingCheckout = catchAsync(async (req, res, next) => {
+  const { tour, price, user, startdate } = req.query;
+
+  if (tour && user && price) {
+    const document = await Tour.findById(tour);
+    if (document?.Dates?.length) {
+      let dateMatch = false;
+      document.Dates.forEach((doc) => {
+        if (new Date(doc.date).getTime() === new Date(startdate).getTime()) {
+          dateMatch = true;
+          if (doc.participants < document.maxGroupSize) {
+            doc.participants++;
+          } else {
+            return next(new ErrorHandler("Booking is already full", 400));
+          }
+          if (doc.participants === document.maxGroupSize) {
+            doc.soldOut = true;
+          }
+        }
+      });
+      if (!dateMatch) {
+        document.Dates.push({
+          date: startdate,
+          participants: 1,
+          soldOut: false,
+        });
+      }
+    } else {
+      document.Dates = [];
+      document.Dates.push({
+        date: startdate,
+        participants: 1,
+        soldOut: false,
+      });
+    }
+    await Booking.create({ tour, user, price });
+    await document.save();
+  }
+
+  next();
+});
+
+// http://localhost:3001/booking-successful?tour=5c88fa8cf4afda39709c295a&user=5c8a21f22f8fb814b56fa18a&price=997

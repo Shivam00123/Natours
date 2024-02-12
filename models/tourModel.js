@@ -79,6 +79,30 @@ const tours = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    Dates: [
+      {
+        date: {
+          type: Date,
+          unique: true,
+          validate: {
+            validator: validateDates,
+            message: "This date is not available for the current Tour.",
+          },
+        },
+        participants: {
+          type: Number,
+          default: 0,
+          validate: {
+            validator: validateParticipants,
+            message: "Participants full",
+          },
+        },
+        soldOut: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
     slug: {
       type: String,
     },
@@ -122,6 +146,30 @@ const tours = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+function validateDates(date) {
+  for (let startDate of this.parent().startDates) {
+    if (String(startDate) === String(date)) {
+      return true;
+    }
+  }
+  if (this.parent().Dates) {
+    const object = this.parent().Dates.filter(
+      (el) => String(el.date) === String(date)
+    );
+    if (object.soldOut) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateParticipants(value) {
+  if (this.parent().maxGroupSize < value) {
+    return false;
+  }
+  return true;
+}
 
 tours.index({ price: 1, ratingsAverage: -1 }); //price->asc ra->desc
 

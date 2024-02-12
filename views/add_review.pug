@@ -1,0 +1,20 @@
+extends base
+
+block content 
+    main.main
+        .login-form
+            h2.heading-secondary.ma-bt-lg Share your experience with Us
+            #review_form.form
+                .form__group
+                    label.form__label(for='review') Review
+                    input#review.form__input(type='text', placeholder='review', required)
+                .form__group 
+                    #review_star.give__reviews__rating
+                        each star in [1,2,3,4,5]
+                            svg#review_star_star.reviews__star--inactive(data-index= star)
+                                use(xlink:href='/img/icons.svg#icon-star')
+                .form__group
+                    button#post_review.btn.btn--green Post
+
+
+    

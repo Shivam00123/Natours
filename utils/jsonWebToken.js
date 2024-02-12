@@ -26,16 +26,18 @@ class JsonToken {
     return cookieOptions;
   }
 
-  async signToken(users, statusCode, res) {
+  async signToken(users, statusCode, res, verified = true) {
     this.token = await jsonwebtoken.sign({ id: this.id }, this.jwtSecret, {
       expiresIn: this.expiresIn,
     });
 
     res.cookie("jwt", this.token, this.cookieOptionsControl());
     users.password = undefined;
+    users.oneTimePassword = undefined;
+    users.otpVerification = undefined;
 
     res.status(statusCode).json({
-      status: "success",
+      status: verified ? "success" : "pending",
       token: this.token,
       data: {
         users,
@@ -69,7 +71,6 @@ class JsonToken {
 
     //check if user still exists
     const freshUser = await User.findById(verification.id);
-
     if (!freshUser)
       return next(
         new ErrorHandler("User belonging to this token does not exist.", 401)
@@ -97,15 +98,41 @@ class JsonToken {
         req.cookies.jwt,
         this.jwtSecret
       );
-      if (!verification) next();
-      const freshUser = await User.findById(verification.id);
-      if (!freshUser) next();
+      if (!verification) return next();
+      const freshUser = await User.findById(verification.id)
+        .select("+otpVerification")
+        .populate({
+          path: "myTours",
+          select: ["tour", "price", "-user"],
+        });
+      if (!freshUser || !freshUser.otpVerification) return next();
       if (freshUser.changedPasswordAfter(verification.iat)) {
         return next();
       }
+      req.bookings = freshUser.myTours;
+      req.user = freshUser;
       res.locals.user = freshUser;
     }
     next();
+  }
+  async loggedInState(req, res, next) {
+    if (req.cookies.jwt) {
+      const verification = await util.promisify(jsonwebtoken.verify)(
+        req.cookies.jwt,
+        this.jwtSecret
+      );
+      if (!verification) return false;
+      const freshUser = await User.findById(verification.id).select(
+        "+otpVerification"
+      );
+
+      if (!freshUser || !freshUser.otpVerification) return false;
+      if (freshUser.changedPasswordAfter(verification.iat)) {
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
 
   logout(req, res, next) {

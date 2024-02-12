@@ -48,7 +48,7 @@ block content
                     +overviewBox("Next date",date,'calendar')
                     +overviewBox("Difficulty",tour.difficulty,'trending-up')
                     +overviewBox("Participants",`${tour.maxGroupSize} people`,'user')
-                    +overviewBox("Rating", `${tour.ratingsAverage} / 5`,'star')
+                    +overviewBox("Rating", `${parseFloat(tour.ratingsAverage).toFixed(1)} / 5`,'star')
 
                 .overview-box__group
                     h2.heading-secondary.ma-bt-lg Your tour guides
@@ -82,6 +82,10 @@ block content
         .reviews
             each review in tour.reviews
                 +reviewCard(review.user.name,review.user.photo,review.review,review.rating)
+        - if (bookedTourIds.includes(String(tour._id)))
+            .review-wrapper 
+                button#add_review.btn.btn--green.border-white(data-tour-id= tour._id) Add review 
+                
 
     section.section-cta
         .cta
@@ -94,7 +98,13 @@ block content
                 p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
             
                 if user
-                    button.btn.btn--green.span-all-rows Book tour now!
+                    if(bookedTourIds.includes(String(tour._id)))
+                        button.btn.btn--green.span-all-rows Booked
+                    else 
+                        - if (isBookingAvailable)
+                            button.btn.btn--green.span-all-rows#book_tour(data-tour-id= tour._id)= `Book tour now!`
+                        - else 
+                            button.btn.btn--green.span-all-rows Booking Full
                 else
-                    a.btn.btn--green.span-all-rows(href="/login") Login to book tour
-    script(src="/js/toursMap.js") 
+                    a.btn.btn--green.span-all-rows(href="/signin") Login to book tour
+    script(src="/js/toursMap.js")

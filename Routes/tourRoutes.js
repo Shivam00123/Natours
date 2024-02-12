@@ -21,12 +21,7 @@ tourRoutes
     tourController.getAllTours
   );
 
-tourRoutes
-  .route("/")
-  .post(
-    authController.restrictTo("admin", "lead-guides"),
-    tourController.createTour
-  );
+tourRoutes.route("/").post(tourController.createTour);
 
 tourRoutes
   .route("/get-stats")

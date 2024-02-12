@@ -44,4 +44,26 @@ module.exports = class Email {
   async sendWelcome() {
     await this.send("welcome", "Welcome to the Natours family!");
   }
+
+  async sendOTP(OTP) {
+    const html = pug.renderFile(`${__dirname}/../views/emails/verify_otp.pug`, {
+      firstName: this.firstName,
+      OTP,
+      subject: "Verify OTP",
+    });
+    const mailOptions = {
+      from: this.from,
+      to: this.to,
+      subject: "Verify OTP",
+      html,
+      text: convert(html),
+    };
+    await this.newTransport().sendMail(mailOptions);
+  }
+  async sendPasswordReset() {
+    await this.send(
+      "resetPassword",
+      "Your password reset token. (valid for only 10 minutes)"
+    );
+  }
 };

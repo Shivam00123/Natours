@@ -24,12 +24,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
       new ErrorHandler("This route is not valid for password updates!", 400)
     );
   }
-  const filteredObjects = filterNotAllowedValues(
-    req.body,
-    "name",
-    "email",
-    "photo"
-  );
+  const filteredObjects = filterNotAllowedValues(req.body, "name", "email");
   if (req.file) filteredObjects.photo = req.file.filename;
   if (!Object.keys(filteredObjects).length)
     return next(new ErrorHandler("Please provide some values to update", 400));
