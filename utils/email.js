@@ -5,15 +5,12 @@ const { convert } = require("html-to-text");
 module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
-    this.from = `Shivam <${process.env.MAIL_FROM}>`;
+    this.from = `shivamjackson6@gmail.com`;
     this.url = url;
     this.firstName = user.name.split(" ")[0];
   }
 
   newTransport() {
-    if (process.env.NODE_ENV === "production") {
-      return 1;
-    }
     return nodemailer.createTransport({
       host: process.env.MAIL_HOST,
       port: process.env.MAIL_PORT,
@@ -67,3 +64,5 @@ module.exports = class Email {
     );
   }
 };
+
+//
