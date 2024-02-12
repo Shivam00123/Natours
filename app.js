@@ -7,6 +7,7 @@ const xss = require("xss-clean");
 const hpp = require("hpp");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
+const cors = require("cors");
 
 const tourRoutes = require("./Routes/tourRoutes");
 const userRouter = require("./Routes/userRoutes");
@@ -26,6 +27,20 @@ app.enable("trust proxy"); // heroku act as a proxy and redireact request so tha
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
+app.use(cors());
+
+// app.use(cors({
+//   origin:"https://google.com" // cors will only allow google.com for Access-Control-Allow-Origin
+// }))
+
+// So there are two kinds of request 1) Simple Request (get,post) 2) Non-simple Request (put,patch,delete)(or any request which contain cookies and Non_standard Headers)
+// Non-Standard-headers => These are the custom headers which we put, these are not part of http specification
+// When Non-simple request is made the browser does a Preflight check/phase it this check the browser make a Options request with the headers it got from request to the server (our server) in order to the headers we defined
+// then we have to respond back this option request with other header to make browser allow the upcoming request or deny it.
+// this way browser dont allow any non-simple request to coonect our server directly.....this is the prt of CORS protocol.
+
+app.options("*", cors()); // options request send ACAO header to allow the Non-simple request
+// app.options("/api/v1/users",cors()) allow only for this api
 //render components
 
 // Body Parser
