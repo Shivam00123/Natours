@@ -20,7 +20,7 @@ const globalErrorHandler = require("./controllers/errorController");
 
 const app = express();
 
-app.enable("trust proxy"); // heroku act as a proxy and redireact request so thats why we need to trust this proxy in order to get req.secure
+app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]); // heroku act as a proxy and redireact request so thats why we need to trust this proxy in order to get req.secure
 
 // Set security HTTP header
 // app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -44,8 +44,8 @@ app.options("*", cors()); // options request send ACAO header to allow the Non-s
 // app.options("/api/v1/users",cors()) allow only for this api
 //render components
 
-app.use(
-  "/webhook-checkout",
+app.post(
+  "/webhook",
   express.raw({ type: "application/json" }),
   bookingsController.webhook_checkout
 );

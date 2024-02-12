@@ -73,12 +73,11 @@ exports.getMyBookings = catchAsync(async (req, res, next) => {
   next();
 });
 
-const createBookingCheckout = async (session) => {
+const createBookingCheckout = async (session, next) => {
   const tour = session.client_reference_id;
   const user = session.metadata.user_id;
   const startdate = session.metadata.startDate;
   const price = session.line_items[0].price_data.unit_amount / 100;
-  console.log("Booking Initiated", { tour, user, price });
 
   if (tour && user && price) {
     const document = await Tour.findById(tour);
@@ -90,7 +89,6 @@ const createBookingCheckout = async (session) => {
           if (doc.participants < document.maxGroupSize) {
             doc.participants++;
           } else {
-            console.log("Booking FUll");
             return next(new ErrorHandler("Booking is already full", 400));
           }
           if (doc.participants === document.maxGroupSize) {
@@ -113,17 +111,13 @@ const createBookingCheckout = async (session) => {
         soldOut: false,
       });
     }
-    console.log("Booking Successfull", { tour, user, price });
     await Booking.create({ tour, user, price });
     await document.save();
   }
 };
 
-const bookingCheckout = (session) => {};
-
-exports.webhook_checkout = () => {
+exports.webhook_checkout = async (req, res, next) => {
   const signature = req.headers["stripe-signature"];
-
   let event;
   try {
     event = stripe.webhooks.constructEvent(
@@ -132,12 +126,13 @@ exports.webhook_checkout = () => {
       process.env.STRIPE_SIGNING_SECRET
     );
   } catch (error) {
-    return res.status(400).send(`webhook error: ${error.message}`);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
   }
   if (event.type === "checkout.session.completed") {
-    createBookingCheckout(event.data.object);
+    await createBookingCheckout(event.data.object, next);
   }
-  res.status(200).json({ received: true });
+  res.status(200).json({ success: true });
 };
 
 exports.cancelBooking = factory.deleteOne(Booking);

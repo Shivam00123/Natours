@@ -19,7 +19,7 @@ class JsonToken {
         Date.now() + this.cookieExpiresIn * 24 * 60 * 60 * 1000
       ),
       httpOnly: true, // browser cannot interact and modify the cookie
-      secure: req.secure || req.headers("x-forwarded-proto") === "https",
+      secure: req.secure || req.headers["x-forwarded-proto"] === "https",
     };
 
     return cookieOptions;
