@@ -78,6 +78,7 @@ const createBookingCheckout = async (session) => {
   const user = session.metadata.user_id;
   const startdate = session.metadata.startDate;
   const price = session.line_items[0].price_data.unit_amount / 100;
+  console.log("Booking Initiated", { tour, user, price });
 
   if (tour && user && price) {
     const document = await Tour.findById(tour);
@@ -89,6 +90,7 @@ const createBookingCheckout = async (session) => {
           if (doc.participants < document.maxGroupSize) {
             doc.participants++;
           } else {
+            console.log("Booking FUll");
             return next(new ErrorHandler("Booking is already full", 400));
           }
           if (doc.participants === document.maxGroupSize) {
@@ -111,6 +113,7 @@ const createBookingCheckout = async (session) => {
         soldOut: false,
       });
     }
+    console.log("Booking Successfull", { tour, user, price });
     await Booking.create({ tour, user, price });
     await document.save();
   }
