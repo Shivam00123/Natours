@@ -13,25 +13,24 @@ class JsonToken {
     this.cookieExpiresIn = process.env.COOKIE_EXPIRES_IN;
   }
 
-  cookieOptionsControl() {
+  cookieOptionsControl(req) {
     const cookieOptions = {
       expiresIn: new Date(
         Date.now() + this.cookieExpiresIn * 24 * 60 * 60 * 1000
       ),
       httpOnly: true, // browser cannot interact and modify the cookie
+      secure: req.secure || req.headers("x-forwarded-proto") === "https",
     };
-    if (this.environment === "production") {
-      cookieOptions.secure = true;
-    }
+
     return cookieOptions;
   }
 
-  async signToken(users, statusCode, res, verified = true) {
+  async signToken(users, statusCode, req, res, verified = true) {
     this.token = await jsonwebtoken.sign({ id: this.id }, this.jwtSecret, {
       expiresIn: this.expiresIn,
     });
 
-    res.cookie("jwt", this.token, this.cookieOptionsControl());
+    res.cookie("jwt", this.token, this.cookieOptionsControl(req));
     users.password = undefined;
     users.oneTimePassword = undefined;
     users.otpVerification = undefined;

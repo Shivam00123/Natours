@@ -17,7 +17,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
     profile: req.body.profile,
     role: req.body.role,
   });
-  await new JsonToken(user._id).signToken(user, 201, res);
+  await new JsonToken(user._id).signToken(user, 201, req, res);
 });
 
 exports.loginUser = catchAsync(async (req, res, next) => {
@@ -38,9 +38,9 @@ exports.loginUser = catchAsync(async (req, res, next) => {
   }
   if (!user.otpVerification) {
     await generateOTP(user);
-    return await new JsonToken(user._id).signToken(user, 200, res, false);
+    return await new JsonToken(user._id).signToken(user, 200, req, res, false);
   }
-  await new JsonToken(user._id).signToken(user, 200, res);
+  await new JsonToken(user._id).signToken(user, 200, req, res);
 });
 
 exports.isAuthenticated = catchAsync(async (req, res, next) => {
@@ -147,7 +147,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.passwordChangedAt = Date.now();
   await user.save({ validateBeforeSave: true });
 
-  await new JsonToken(user._id).signToken(user, 200, res);
+  await new JsonToken(user._id).signToken(user, 200, req, res);
 });
 
 exports.restrictTo = (...roles) => {

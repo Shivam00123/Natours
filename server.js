@@ -30,3 +30,11 @@ process.on("unhandledRejection", () => {
     process.exit(1);
   });
 });
+
+process.on("SIGTERM", () => {
+  // heroku emites this event in every 24 hr and shut down the application and runs it again to maintain the application.....but in this process of shutting down all the requests actually hangs down and does not proceed so we have to complete them then let it shut down the app.
+  console.log("SIGTERM received! Shutting down application gracefully");
+  server.close(() => {
+    console.log("Process terminated!");
+  });
+});

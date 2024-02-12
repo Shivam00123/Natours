@@ -18,6 +18,8 @@ const globalErrorHandler = require("./controllers/errorController");
 
 const app = express();
 
+app.enable("trust proxy"); // heroku act as a proxy and redireact request so thats why we need to trust this proxy in order to get req.secure
+
 // Set security HTTP header
 // app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
