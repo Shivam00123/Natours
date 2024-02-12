@@ -76,15 +76,16 @@ exports.getMyBookings = catchAsync(async (req, res, next) => {
 });
 
 const createBookingCheckout = async (session, next) => {
-  console.log({ session });
   const tour = session.client_reference_id;
   const user = session.metadata.user_id;
   const startdate = session.metadata.startDate;
   const price = session.line_items[0].price_data.unit_amount / 100;
-
+  console.log({ tour, user, startdate, price });
   if (tour && user && price) {
     const document = await Tour.findById(tour);
+    console.log({ id1: document._id });
     if (document?.Dates?.length) {
+      console.log({ id2: document.Dates });
       let dateMatch = false;
       document.Dates.forEach((doc) => {
         if (new Date(doc.date).getTime() === new Date(startdate).getTime()) {
@@ -99,6 +100,7 @@ const createBookingCheckout = async (session, next) => {
           }
         }
       });
+      console.log({ id3: dateMatch });
       if (!dateMatch) {
         document.Dates.push({
           date: startdate,
@@ -107,6 +109,7 @@ const createBookingCheckout = async (session, next) => {
         });
       }
     } else {
+      console.log({ id4: "else" });
       document.Dates = [];
       document.Dates.push({
         date: startdate,
@@ -114,8 +117,11 @@ const createBookingCheckout = async (session, next) => {
         soldOut: false,
       });
     }
+    console.log({ id5: "create booking" });
     await Booking.create({ tour, user, price });
+    console.log({ id6: "save doc" });
     await document.save();
+    console.log({ id7: "saved doc" });
   }
 };
 
