@@ -13,6 +13,7 @@ const ErrorHandler = require("../utils/errorHandler");
 exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId);
   const startDate = req.params.startdate;
+  console.log({ tour, startDate });
   if (!tour || !startDate)
     return next(new ErrorHandler("Tour or StartDate not found", 400));
   const customer = await stripe.customers.create({
@@ -56,6 +57,7 @@ exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
       startDate,
     },
   });
+  console.log("session created");
 
   res.status(200).json({
     status: "success",
@@ -74,6 +76,7 @@ exports.getMyBookings = catchAsync(async (req, res, next) => {
 });
 
 const createBookingCheckout = async (session, next) => {
+  console.log({ session });
   const tour = session.client_reference_id;
   const user = session.metadata.user_id;
   const startdate = session.metadata.startDate;
