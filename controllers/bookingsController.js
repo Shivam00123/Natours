@@ -13,7 +13,6 @@ const ErrorHandler = require("../utils/errorHandler");
 exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId);
   const startDate = req.params.startdate;
-  console.log({ tour, startDate });
   if (!tour || !startDate)
     return next(new ErrorHandler("Tour or StartDate not found", 400));
   const customer = await stripe.customers.create({
@@ -57,7 +56,6 @@ exports.requestCheckoutSession = catchAsync(async (req, res, next) => {
       startDate,
     },
   });
-  console.log("session created");
 
   res.status(200).json({
     status: "success",
@@ -76,17 +74,13 @@ exports.getMyBookings = catchAsync(async (req, res, next) => {
 });
 
 const createBookingCheckout = async (session, next) => {
-  console.log({ ssssssssssssssssssssssssssss: session });
   const user = (await User.findOne({ email: session.metadata.email }))._id;
   const tour = session?.client_reference_id;
   const startdate = session?.metadata?.startDate;
   const price = (session.amount_total * 1) / 100;
-  console.log({ tour, user, startdate, price });
   if (tour && user && price) {
     const document = await Tour.findById(tour);
-    console.log({ id1: document._id });
     if (document?.Dates?.length) {
-      console.log({ id2: document.Dates });
       let dateMatch = false;
       document.Dates.forEach((doc) => {
         if (new Date(doc.date).getTime() === new Date(startdate).getTime()) {
@@ -101,7 +95,6 @@ const createBookingCheckout = async (session, next) => {
           }
         }
       });
-      console.log({ id3: dateMatch });
       if (!dateMatch) {
         document.Dates.push({
           date: startdate,
@@ -110,7 +103,6 @@ const createBookingCheckout = async (session, next) => {
         });
       }
     } else {
-      console.log({ id4: "else" });
       document.Dates = [];
       document.Dates.push({
         date: startdate,
@@ -118,11 +110,8 @@ const createBookingCheckout = async (session, next) => {
         soldOut: false,
       });
     }
-    console.log({ id5: "create booking" });
     await Booking.create({ tour, user, price });
-    console.log({ id6: "save doc" });
     await document.save();
-    console.log({ id7: "saved doc" });
   }
 };
 
@@ -139,7 +128,6 @@ exports.webhook_checkout = async (req, res, next) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
-  console.log({ EVVVVVVVVVVVVVVVVVVVVVV: event.type });
   if (event.type === "checkout.session.completed") {
     await createBookingCheckout(event.data.object, next);
   }

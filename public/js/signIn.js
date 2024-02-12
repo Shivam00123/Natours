@@ -14,7 +14,6 @@ export const loginUser = async (email, password) => {
       location.assign(`/verifyOTP/${response.data.users.email}`);
     }, 1500);
   } else {
-    console.log("logged In");
     Alert("error", response.message);
   }
 };
