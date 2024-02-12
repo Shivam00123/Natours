@@ -10,7 +10,6 @@ export const resetPassword = async (password, confirmPassword) => {
     password,
     confirmPassword,
   });
-  console.log({ response });
   if (response.status === "success") {
     Alert(
       "success",

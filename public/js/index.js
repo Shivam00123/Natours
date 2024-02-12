@@ -64,12 +64,23 @@ if (userData_form) {
     let email = document.getElementById("email").value;
     let name = document.getElementById("name").value;
     let photo = document.getElementById("photo");
-    console.log(photo.files);
     const form = new FormData();
     form.append("name", name);
     form.append("email", email);
     form.append("photo", document.getElementById("photo").files[0]);
     updateNameOrEmail(form);
+  });
+  let img = document.getElementById("user_profile");
+  let user_profile_input = document.getElementById("photo");
+  user_profile_input.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.addEventListener("loadend", () => {
+        img.src = fileReader.result;
+      });
+    }
   });
 }
 

@@ -6,6 +6,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
 const cookieParser = require("cookie-parser");
+const compression = require("compression");
 
 const tourRoutes = require("./Routes/tourRoutes");
 const userRouter = require("./Routes/userRoutes");
@@ -33,6 +34,8 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" })); // to grab the f
 app.use(mongoSanitize()); // it removes all the $ sign from req.body so no one can inject some query on the req body
 
 app.use(xss()); // it protect against some malicious code like injecting html and js into the req body
+
+app.use(compression());
 
 app.use(
   hpp({
@@ -71,7 +74,6 @@ app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/bookings", bookingsRouter);
 
 app.all("*", (req, res, next) => {
-  console.log(req.originalUrl);
   if (req.originalUrl === "/bundle.js.map") return next();
   next(new ErrorHandler("Invalid URL!", 404));
 });

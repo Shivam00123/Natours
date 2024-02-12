@@ -4,11 +4,9 @@ import { Alert } from "./alert";
 export const updateNameOrEmail = async (data) => {
   const response = await axios({
     method: "PATCH",
-    url: "http://localhost:3001/api/v1/users/updateMe",
+    url: "/api/v1/users/updateMe",
     data,
   });
-
-  console.log({ response });
 
   if (response.data.status === "success") {
     Alert("success", "Settings Updated!");

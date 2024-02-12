@@ -67,7 +67,6 @@ const handleJSONWebTokenError = (error) =>
   new ErrorHandler("Token is either invalid or expired!", 401);
 
 module.exports = (err, req, res, next) => {
-  console.log({ err });
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
   let error = { ...err, name: err.name, code: err.code, message: err.message };

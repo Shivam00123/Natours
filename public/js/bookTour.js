@@ -16,7 +16,6 @@ export const bookTour = async (tourId, startDate) => {
       sessionId: session.session.id,
     });
   } catch (error) {
-    console.log(error);
     return Alert("error", error.message);
   }
 };

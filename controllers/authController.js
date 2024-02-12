@@ -75,7 +75,6 @@ exports.logout = (req, res) => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   //get user with email;
   const email = req.body.email;
-  console.log({ email });
   if (!email) return next(new ErrorHandler("Please provide an Email!", 400));
 
   const user = await User.findOne({ email });

@@ -10,8 +10,6 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config.env" });
 
-console.log(process.env.STRIPE_SECRET_KEY);
-
 const DB = `mongodb+srv://shivamrawat06994:${encodeURIComponent(
   "#9911011005@Mongo@#"
 )}@cluster0.lge6wvg.mongodb.net/natours`;

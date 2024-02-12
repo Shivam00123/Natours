@@ -6,7 +6,6 @@ export const cancelBooking = async (bookingId) => {
   const response = await delete_fetchAPI(
     `bookings/cancel-booking/${bookingId}`
   );
-  console.log({ response });
   if (response.status === "success") {
     Alert("success", "Booking successfully canceled!");
     return;
