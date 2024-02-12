@@ -14,6 +14,7 @@ const userRouter = require("./Routes/userRoutes");
 const reviewRouter = require("./Routes/reviewRoutes");
 const viewRouter = require("./Routes/viewRoutes");
 const bookingsRouter = require("./Routes/bookingsRoutes");
+const bookingsController = require("./controllers/bookingsController");
 const ErrorHandler = require("./utils/errorHandler");
 const globalErrorHandler = require("./controllers/errorController");
 
@@ -42,6 +43,12 @@ app.use(cors());
 app.options("*", cors()); // options request send ACAO header to allow the Non-simple request
 // app.options("/api/v1/users",cors()) allow only for this api
 //render components
+
+app.use(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  bookingsController.webhook_checkout
+);
 
 // Body Parser
 app.use(express.json({ limit: "10kb" })); // so body of size upto 10kb is acceptable

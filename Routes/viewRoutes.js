@@ -45,7 +45,6 @@ Router.get(
 Router.get(
   "/booking-successful",
   authController.isLoggedIn,
-  authController.createBookingCheckout,
   authController.isAuthenticated,
   viewController.bookingSuccessful
 );
