@@ -104,8 +104,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     resetTokenExpiresIn: { $gt: Date.now() },
   });
 
-  console.log({ user, body: req.body });
-
   if (!user) {
     return next(new ErrorHandler("Token is either Invalid or expired", 400));
   }
@@ -113,7 +111,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.confirmPassword = req.body.confirmPassword;
   user.resetPasswordToken = undefined;
   user.resetTokenExpiresIn = undefined;
-  console.log({ after: user });
   await user.save();
 
   res.status(200).json({
