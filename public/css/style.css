@@ -708,10 +708,16 @@ body {
   margin-right: 1px;
 }
 .reviews__star--active {
+  height: 3rem;
+  width: 3rem;
   fill: #55c57a;
+  margin-right: 1rem;
 }
 .reviews__star--inactive {
+  height: 3rem;
+  width: 3rem;
   fill: #bbb;
+  margin-right: 1rem;
 }
 
 .section-cta {
